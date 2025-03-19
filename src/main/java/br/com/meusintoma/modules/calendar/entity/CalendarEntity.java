@@ -1,11 +1,11 @@
-package br.com.meusintoma.modules.symptonEvent.entity;
+package br.com.meusintoma.modules.calendar.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
-import org.hibernate.annotations.CreationTimestamp;
-
-import br.com.meusintoma.modules.patient.entity.PatientEntity;
+import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
+import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -18,23 +18,23 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "sympton")
+@Entity(name = "calendar")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SymptonEventEntity {
+public class CalendarEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    private String symptonName;
 
-    @CreationTimestamp
-    private LocalDateTime startedAt;
+    private LocalDate date;
+    private LocalTime startTime;
+    private LocalTime endTime;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id", nullable = false)
-    private PatientEntity patient;
+    @JoinColumn(name="doctor_id", nullable = false)
+    private DoctorEntity doctor;
 
     @Enumerated(EnumType.STRING)
-    private Severity severity;
+    private CalendarStatus calendarStatus;
 }

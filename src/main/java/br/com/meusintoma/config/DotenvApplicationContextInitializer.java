@@ -10,9 +10,9 @@ public class DotenvApplicationContextInitializer implements ApplicationContextIn
     public void initialize(ConfigurableApplicationContext applicationContext) {
         Dotenv dotenv = Dotenv.configure().load();
 
-        // dotenv.entries().forEach(entry -> {
-        //     System.out.println("[Dotenv Loaded] " + entry.getKey() + " = " + entry.getValue());
-        //     System.setProperty(entry.getKey(), entry.getValue());
-        // });
+        dotenv.entries().forEach(entry -> {
+            System.out.println("[Dotenv Loaded] " + entry.getKey() + " = " + entry.getValue());
+            System.setProperty(entry.getKey(), entry.getValue());
+        });
     }
 }
