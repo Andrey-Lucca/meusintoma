@@ -34,7 +34,7 @@ public class CreateUserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UserEntity create(CreateUserDTO userDTO) {
+    public UserEntity execute(CreateUserDTO userDTO) {
         if (userDTO == null) {
             throw new IllegalArgumentException("The fields cannot be null");
         }
