@@ -6,18 +6,21 @@ import java.util.List;
 import br.com.meusintoma.modules.appointment.entity.AppointmentEntity;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientEntity;
+import br.com.meusintoma.modules.secretary.entity.SecretaryEntity;
 import br.com.meusintoma.modules.user.entity.UserEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 
 @Entity(name = "doctor")
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 public class DoctorEntity extends UserEntity {
 
     private String specialization;
@@ -31,4 +34,8 @@ public class DoctorEntity extends UserEntity {
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CalendarEntity> calendars = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "secretary_id")
+    private SecretaryEntity secretary;
 }
