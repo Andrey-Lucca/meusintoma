@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
+import br.com.meusintoma.modules.symptonEvent.enums.Severity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,11 +16,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity(name = "sympton")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class SymptonEventEntity {
