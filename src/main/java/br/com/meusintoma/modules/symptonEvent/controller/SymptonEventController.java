@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.meusintoma.modules.patient.repository.PatientRepository;
@@ -19,7 +21,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/sympton")
+@RequestMapping("/symptoms")
 public class SymptonEventController {
 
     @Autowired
@@ -47,6 +49,40 @@ public class SymptonEventController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Não foi possível registrar o sintoma");
+        }
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<Object> getAllSymptons(HttpServletRequest request){
+        try {
+            var patientIdObj = request.getAttribute("user_id");
+            if (patientIdObj == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado");
+            }
+        
+            UUID patientId = UUID.fromString(patientIdObj.toString());
+            var response = this.symptonService.getPatientSympton(patientId);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Não foi possível obter os registros do usuário");
+        }
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<Object> getSymptonByName(@RequestParam String symptonName, HttpServletRequest request){
+        try {
+            var patientIdObj = request.getAttribute("user_id");
+            if (patientIdObj == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado");
+            }
+        
+            UUID patientId = UUID.fromString(patientIdObj.toString());
+            var response = this.symptonService.getPatientSymptomsBySymptonName(patientId, symptonName);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Não foi possível encontrar o sintoma em específico");
         }
     }
 

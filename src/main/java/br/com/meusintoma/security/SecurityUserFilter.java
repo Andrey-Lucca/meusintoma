@@ -31,7 +31,6 @@ public class SecurityUserFilter extends OncePerRequestFilter {
                 return;
             }
 
-            System.out.println("Token ->" + token);
             var roles = token.getClaim("roles").asList(Object.class);
             var grants = roles.stream()
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString().toUpperCase())).toList();

@@ -1,5 +1,7 @@
 package br.com.meusintoma.modules.symptonEvent.mapper;
 
+import java.util.List;
+
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.modules.symptonEvent.dto.SymptonEventRequestDTO;
 import br.com.meusintoma.modules.symptonEvent.dto.SymptonEventResponseDTO;
@@ -21,4 +23,11 @@ public class SymptonEventMapper {
                 .severity(symptonEventEntity.getSeverity()).startedAt(symptonEventEntity.getStartedAt()).build();
         return responseDTO;
     }
+
+    public static List<SymptonEventResponseDTO> toResponseDTO(List<SymptonEventEntity> entities) {
+        return entities.stream()
+                .map(SymptonEventMapper::toResponseDTO)
+                .toList();
+    }
+
 }
