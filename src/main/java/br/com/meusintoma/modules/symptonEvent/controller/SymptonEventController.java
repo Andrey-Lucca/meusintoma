@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,13 +55,13 @@ public class SymptonEventController {
 
     @GetMapping
     @PreAuthorize("hasRole('PATIENT')")
-    public ResponseEntity<Object> getAllSymptons(HttpServletRequest request){
+    public ResponseEntity<Object> getAllSymptons(HttpServletRequest request) {
         try {
             var patientIdObj = request.getAttribute("user_id");
             if (patientIdObj == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado");
             }
-        
+
             UUID patientId = UUID.fromString(patientIdObj.toString());
             var response = this.symptonService.getPatientSympton(patientId);
             return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -71,19 +72,37 @@ public class SymptonEventController {
 
     @GetMapping("/search")
     @PreAuthorize("hasRole('PATIENT')")
-    public ResponseEntity<Object> getSymptonByName(@RequestParam String symptonName, HttpServletRequest request){
+    public ResponseEntity<Object> getSymptonByName(@RequestParam String symptonName, HttpServletRequest request) {
         try {
             var patientIdObj = request.getAttribute("user_id");
             if (patientIdObj == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado");
             }
-        
+
             UUID patientId = UUID.fromString(patientIdObj.toString());
             var response = this.symptonService.getPatientSymptomsBySymptonName(patientId, symptonName);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Não foi possível encontrar o sintoma em específico");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Não foi possível encontrar o sintoma em específico");
         }
     }
 
+    @DeleteMapping
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<Object> deleteSympton(@RequestParam String symptonId, HttpServletRequest request) {
+        try {
+            var patientIdObj = request.getAttribute("user_id");
+            if (patientIdObj == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado");
+            }
+            UUID sympton = UUID.fromString(symptonId.toString());
+            var response = this.symptonService.deleteSympton(sympton);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Não foi possível excluir o sintoma");
+        }
+    }
 }

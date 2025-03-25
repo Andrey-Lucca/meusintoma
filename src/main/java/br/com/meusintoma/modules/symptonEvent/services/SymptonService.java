@@ -34,10 +34,22 @@ public class SymptonService {
     }
 
     public List<SymptonEventResponseDTO> getPatientSymptomsBySymptonName(UUID patientId, String symptonName) {
-        var symptons = this.symptonEventRepository.findByPatientIdAndSymptonNameContainingIgnoreCaseOrderByStartedAtDesc(patientId, symptonName);
+        var symptons = this.symptonEventRepository
+                .findByPatientIdAndSymptonNameContainingIgnoreCaseOrderByStartedAtDesc(patientId, symptonName);
 
         List<SymptonEventResponseDTO> responseDTO = SymptonEventMapper.toResponseDTO(symptons);
 
         return responseDTO;
+    }
+
+    public SymptonEventResponseDTO deleteSympton(UUID symptonId) {
+        var sympton = this.symptonEventRepository.findById(symptonId)
+                .orElseThrow(() -> new RuntimeException("Sintoma não encontrado"));
+
+        System.out.println(sympton);
+
+        SymptonEventResponseDTO symptonEventResponseDTO = SymptonEventMapper.toResponseDTO(sympton);
+        this.symptonEventRepository.deleteById(symptonId);
+        return symptonEventResponseDTO;
     }
 }
