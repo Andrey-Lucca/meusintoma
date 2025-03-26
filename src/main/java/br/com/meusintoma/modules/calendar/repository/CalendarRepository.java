@@ -1,0 +1,11 @@
+package br.com.meusintoma.modules.calendar.repository;
+
+import java.util.UUID;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
+
+public interface CalendarRepository extends JpaRepository<CalendarEntity, UUID> {
+
+}

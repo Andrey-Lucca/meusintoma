@@ -1,5 +1,6 @@
 package br.com.meusintoma.modules.symptonEvent.services;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import br.com.meusintoma.modules.symptonEvent.dto.SymptonEventResponseDTO;
 import br.com.meusintoma.modules.symptonEvent.entity.SymptonEventEntity;
 import br.com.meusintoma.modules.symptonEvent.mapper.SymptonEventMapper;
 import br.com.meusintoma.modules.symptonEvent.repository.SymptonEventRepository;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class SymptonService {
@@ -42,11 +44,21 @@ public class SymptonService {
         return responseDTO;
     }
 
+    public SymptonEventResponseDTO updatePatientSympton(UUID symptonId, SymptonEventEntity symptonEvent) {
+        var existingSympton = this.symptonEventRepository.findById(symptonId)
+                .orElseThrow(() -> new EntityNotFoundException("Sintoma não encontrado"));
+
+        existingSympton.setSymptonName(symptonEvent.getSymptonName());
+        existingSympton.setSeverity(symptonEvent.getSeverity());
+
+        var updatedSympton = this.symptonEventRepository.save(existingSympton);
+
+        return SymptonEventMapper.toResponseDTO(updatedSympton);
+    }
+
     public SymptonEventResponseDTO deleteSympton(UUID symptonId) {
         var sympton = this.symptonEventRepository.findById(symptonId)
                 .orElseThrow(() -> new RuntimeException("Sintoma não encontrado"));
-
-        System.out.println(sympton);
 
         SymptonEventResponseDTO symptonEventResponseDTO = SymptonEventMapper.toResponseDTO(sympton);
         this.symptonEventRepository.deleteById(symptonId);

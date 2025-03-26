@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +20,7 @@ import br.com.meusintoma.modules.patient.repository.PatientRepository;
 import br.com.meusintoma.modules.symptonEvent.dto.SymptonEventRequestDTO;
 import br.com.meusintoma.modules.symptonEvent.mapper.SymptonEventMapper;
 import br.com.meusintoma.modules.symptonEvent.services.SymptonService;
+import br.com.meusintoma.security.utils.AuthUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -36,13 +39,8 @@ public class SymptonEventController {
     public ResponseEntity<Object> create(@RequestBody SymptonEventRequestDTO symptonEventDTO,
             HttpServletRequest request) {
         try {
-            var patientIdObj = request.getAttribute("user_id");
-            if (patientIdObj == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado");
-            }
-
-            String patientId = patientIdObj.toString();
-            var patient = patientRepository.findById(UUID.fromString(patientId))
+            UUID patientId = AuthUtils.getAuthenticatedPatientId(request);
+            var patient = patientRepository.findById(patientId)
                     .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado"));
 
             var symptonEventEntity = SymptonEventMapper.toEntity(symptonEventDTO, patient);
@@ -57,12 +55,7 @@ public class SymptonEventController {
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> getAllSymptons(HttpServletRequest request) {
         try {
-            var patientIdObj = request.getAttribute("user_id");
-            if (patientIdObj == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado");
-            }
-
-            UUID patientId = UUID.fromString(patientIdObj.toString());
+            UUID patientId = AuthUtils.getAuthenticatedPatientId(request);
             var response = this.symptonService.getPatientSympton(patientId);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
@@ -74,17 +67,34 @@ public class SymptonEventController {
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> getSymptonByName(@RequestParam String symptonName, HttpServletRequest request) {
         try {
-            var patientIdObj = request.getAttribute("user_id");
-            if (patientIdObj == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado");
-            }
-
-            UUID patientId = UUID.fromString(patientIdObj.toString());
+            UUID patientId = AuthUtils.getAuthenticatedPatientId(request);
             var response = this.symptonService.getPatientSymptomsBySymptonName(patientId, symptonName);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Não foi possível encontrar o sintoma em específico");
+        }
+    }
+
+    @PutMapping("/{symptonId}")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<Object> updateSympton(
+            @PathVariable UUID symptonId,
+            @RequestBody SymptonEventRequestDTO symptonEventDTO,
+            HttpServletRequest request) {
+        try {
+
+            UUID patientId = AuthUtils.getAuthenticatedPatientId(request);
+            var patient = patientRepository.findById(patientId)
+                    .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado"));
+
+            var symptonEventEntity = SymptonEventMapper.toEntity(symptonEventDTO, patient);
+
+            var response = this.symptonService.updatePatientSympton(symptonId, symptonEventEntity);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Não foi possível atualizar esse sintoma");
         }
     }
 

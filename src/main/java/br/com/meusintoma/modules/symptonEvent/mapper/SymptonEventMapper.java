@@ -20,7 +20,7 @@ public class SymptonEventMapper {
     public static SymptonEventResponseDTO toResponseDTO(SymptonEventEntity symptonEventEntity) {
         var responseDTO = SymptonEventResponseDTO.builder().id(symptonEventEntity.getId())
                 .symptonName(symptonEventEntity.getSymptonName())
-                .severity(symptonEventEntity.getSeverity()).startedAt(symptonEventEntity.getStartedAt()).build();
+                .severity(symptonEventEntity.getSeverity()).startedAt(symptonEventEntity.getStartedAt()).updatedAt(symptonEventEntity.getUpdatedAt()).build();
         return responseDTO;
     }
 

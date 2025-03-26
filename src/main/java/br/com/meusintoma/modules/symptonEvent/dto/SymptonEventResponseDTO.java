@@ -17,4 +17,5 @@ public class SymptonEventResponseDTO {
     private String symptonName;
     private LocalDateTime startedAt;
     private Severity severity;
+    private LocalDateTime updatedAt;
 }
