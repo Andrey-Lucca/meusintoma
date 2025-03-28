@@ -39,7 +39,7 @@ public class SymptonEventController {
     public ResponseEntity<Object> create(@RequestBody SymptonEventRequestDTO symptonEventDTO,
             HttpServletRequest request) {
         try {
-            UUID patientId = AuthUtils.getAuthenticatedPatientId(request);
+            UUID patientId = AuthUtils.getAuthenticatedUserId(request);
             var patient = patientRepository.findById(patientId)
                     .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado"));
 
@@ -55,7 +55,7 @@ public class SymptonEventController {
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> getAllSymptons(HttpServletRequest request) {
         try {
-            UUID patientId = AuthUtils.getAuthenticatedPatientId(request);
+            UUID patientId = AuthUtils.getAuthenticatedUserId(request);
             var response = this.symptonService.getPatientSympton(patientId);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
@@ -67,7 +67,7 @@ public class SymptonEventController {
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> getSymptonByName(@RequestParam String symptonName, HttpServletRequest request) {
         try {
-            UUID patientId = AuthUtils.getAuthenticatedPatientId(request);
+            UUID patientId = AuthUtils.getAuthenticatedUserId(request);
             var response = this.symptonService.getPatientSymptomsBySymptonName(patientId, symptonName);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
@@ -84,7 +84,7 @@ public class SymptonEventController {
             HttpServletRequest request) {
         try {
 
-            UUID patientId = AuthUtils.getAuthenticatedPatientId(request);
+            UUID patientId = AuthUtils.getAuthenticatedUserId(request);
             var patient = patientRepository.findById(patientId)
                     .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado"));
 

@@ -20,6 +20,9 @@ public class CalendarPermissionValidator {
 
     public void validateCalendarOperationPermission(UUID authenticatedUserId, String authenticatedUserRole,
             UUID targetDoctorId) {
+                System.out.println(authenticatedUserRole);
+                System.out.println(authenticatedUserId);
+                System.out.println(targetDoctorId);
         if (authenticatedUserRole.equals("DOCTOR")) {
             if (!authenticatedUserId.equals(targetDoctorId)) {
                 throw new AccessDeniedException("Médico só pode modificar seu próprio calendário");

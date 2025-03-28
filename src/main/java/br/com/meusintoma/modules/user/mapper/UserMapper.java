@@ -5,7 +5,6 @@ import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.modules.secretary.entity.SecretaryEntity;
 import br.com.meusintoma.modules.user.dto.CreateUserDTO;
 import br.com.meusintoma.modules.user.entity.UserEntity;
-import br.com.meusintoma.modules.user.entity.UserType;
 
 public class UserMapper {
 

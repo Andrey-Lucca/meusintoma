@@ -40,13 +40,12 @@ public class CalendarSlotService {
                     || !(current.isBefore(request.getBreakEnd()) && current.plusMinutes(slotDurationMinutes)
                             .isAfter(request.getBreakStart()))) {
                 CalendarEntity calendarEntity = CalendarEntity.builder().date(request.getDate())
-                        .startTime(request.getStartTime())
+                        .startTime(current)
                         .endTime(current.plusMinutes(request.getSlotDurationMinutes())).doctor(doctor)
                         .calendarStatus(CalendarStatus.AVAILABLE).build();
                 slots.add(calendarEntity);
             }
-            current = current.plusMinutes(request.getSlotDurationMinutes()); // Pega a hora atual e soma tempo da
-                                                                             // consulta. Exemplo: 08h + 01h = 09h
+            current = current.plusMinutes(request.getSlotDurationMinutes()); // Pega a hora atual e soma tempo da consulta. Exemplo: 08h + 01h = 09h
         }
         return slots;
     }
