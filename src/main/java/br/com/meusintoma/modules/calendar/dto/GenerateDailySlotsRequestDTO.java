@@ -5,15 +5,15 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GenerateSlotsRequestDTO {
+public class GenerateDailySlotsRequestDTO {
     private UUID doctorId;
     private LocalDate date;
     private LocalTime startTime;

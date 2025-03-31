@@ -1,5 +1,6 @@
 package br.com.meusintoma.modules.calendar.services;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,10 @@ public class CalendarPermissionService {
     @Autowired
     private CalendarPermissionValidator calendarPermissionValidator;
 
-    public void validatePermissionCalendar(HttpServletRequest request, UUID doctorId){
+    public void validatePermissionCalendar(HttpServletRequest request, UUID doctorId, LocalDate requestDate){
         var userId = AuthValidatorUtils.getAuthenticatedUserId(request);
         var currentUserRole = AuthValidatorUtils.getCurrentUserRole();
+        calendarPermissionValidator.validateCalendarDatePermission(requestDate);
         calendarPermissionValidator.validateCalendarOperationPermission(userId, currentUserRole, doctorId);
     }
 
