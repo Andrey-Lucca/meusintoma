@@ -1,8 +1,8 @@
 package br.com.meusintoma.modules.calendar.controller;
 
-import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,6 @@ import br.com.meusintoma.modules.calendar.dto.CalendarWeeklySlotsGenerationDTO;
 import br.com.meusintoma.modules.calendar.dto.GenerateDailySlotsRequestDTO;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendar.mapper.CalendarMapperDTO;
-import br.com.meusintoma.modules.calendar.security.CalendarPermissionValidator;
 import br.com.meusintoma.modules.calendar.services.CalendarPermissionService;
 import br.com.meusintoma.modules.calendar.services.CalendarSlotService;
 import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
@@ -40,9 +39,6 @@ public class CalendarBulkController {
         @Autowired
         private DoctorService doctorService;
 
-        @Autowired
-        private CalendarPermissionValidator permissionValidator;
-
         @PostMapping("/daily-slots")
         @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
         public ResponseEntity<Object> createDailySlots(@RequestBody GenerateDailySlotsRequestDTO requestDTO,
@@ -53,7 +49,7 @@ public class CalendarBulkController {
                         }
 
                         calendarPermissionService.validatePermissionCalendar(request, requestDTO.getDoctorId(),
-                                        requestDTO.getDate());
+                                        Optional.ofNullable(requestDTO.getDate()));
 
                         DoctorEntity doctor = doctorService.findDoctorById(requestDTO.getDoctorId());
 
@@ -83,7 +79,7 @@ public class CalendarBulkController {
                 try {
                         requestDTO.setRequestDate(LocalDate.now());
                         calendarPermissionService.validatePermissionCalendar(request, requestDTO.getDoctorId(),
-                                        requestDTO.getRequestDate());
+                                        Optional.ofNullable(requestDTO.getDate()));
 
                         DoctorEntity doctor = doctorService.findDoctorById(requestDTO.getDoctorId());
 

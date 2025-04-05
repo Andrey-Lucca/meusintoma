@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidDateException.class)
     public ResponseEntity<ErrorResponse> handleInvalidDate(InvalidDateException ex) {
         ErrorResponse error = new ErrorResponse(
-            "DATA_INVALIDA",
+            "INVALIDE_DATE",
             ex.getMessage(),
             "Você tentou usar uma data anterior a data atual, e isso ocasionou o erro"
         );
@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CustomAccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleCustomAccessDenied(CustomAccessDeniedException ex) {
         ErrorResponse error = new ErrorResponse(
-            "ACESSO_NEGADO",
+            "DENIED_ACESS",
             ex.getMessage(),
             null
         );
