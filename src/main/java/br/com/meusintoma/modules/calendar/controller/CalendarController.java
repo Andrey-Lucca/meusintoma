@@ -8,12 +8,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.meusintoma.exceptions.CustomAccessDeniedException;
 import br.com.meusintoma.exceptions.InvalidDateException;
+import br.com.meusintoma.modules.calendar.dto.UpdateCalendarDTO;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.NoDoctorCalendarException;
 import br.com.meusintoma.modules.calendar.services.CalendarPermissionService;
@@ -41,6 +44,25 @@ public class CalendarController {
             throw e;
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Houve uma exceção ao tentar visualizar o calendário do doutor!");
+        }
+    }
+
+    @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
+    @PatchMapping("/doctor/{doctorId}/{calendarId}")
+    public ResponseEntity<Object> updateCalendarStatus(@PathVariable UUID doctorId, @PathVariable UUID calendarId,
+            @RequestBody UpdateCalendarDTO statusDTO, HttpServletRequest request) {
+        try {
+            calendarService.verifyDoctorHasCalendar(doctorId);
+            calendarPermissionService.validatePermissionCalendar(request, doctorId, Optional.empty());
+            var response = calendarService.updateCalendarStatus(calendarId, statusDTO);
+            return ResponseEntity.ok().body(response);
+
+        } catch (InvalidDateException | CustomAccessDeniedException e) {
+            throw e;
+        } catch (NoDoctorCalendarException | CalendarNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Ocorreu um erro ao tentar excluir esse horário do calendário");
         }
     }
 

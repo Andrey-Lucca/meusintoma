@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.modules.calendar.dto.CalendarResponseDTO;
+import br.com.meusintoma.modules.calendar.dto.UpdateCalendarDTO;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
@@ -36,6 +37,17 @@ public class CalendarService {
                 .filter(calendar -> !calendar.getDate().isBefore(currentDate)
                         && !calendar.getStartTime().isBefore(currentTime))
                 .map(CalendarMapperDTO::toResponseDTO).toList();
+    }
+
+    public CalendarResponseDTO updateCalendarStatus(UUID calendarId, UpdateCalendarDTO calendarDTO) {
+        CalendarEntity calendar = calendarRepository.findById(calendarId)
+                .orElseThrow(() -> new CalendarNotFoundException("Horário não encontrado"));
+
+        calendar.setCalendarStatus(calendarDTO.getStatus());
+
+        calendarRepository.save(calendar);
+
+        return CalendarMapperDTO.toResponseDTO(calendar);
     }
 
     public void deleteCalendarById(UUID calendarId) {
