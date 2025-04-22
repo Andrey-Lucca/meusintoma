@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.modules.calendar.security.CalendarPermissionValidator;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
-import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class CalendarPermissionService {
@@ -17,8 +16,8 @@ public class CalendarPermissionService {
     @Autowired
     private CalendarPermissionValidator calendarPermissionValidator;
 
-    public void validatePermissionCalendar(HttpServletRequest request, UUID doctorId, Optional<LocalDate> requestDate) {
-        var userId = AuthValidatorUtils.getAuthenticatedUserId(request);
+    public void validatePermissionCalendar(UUID doctorId, Optional<LocalDate> requestDate) {
+        var userId = AuthValidatorUtils.getAuthenticatedUserId();
         var currentUserRole = AuthValidatorUtils.getCurrentUserRole();
         requestDate.ifPresent(date -> 
         calendarPermissionValidator.validateCalendarDatePermission(date));

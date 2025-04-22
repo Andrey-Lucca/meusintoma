@@ -7,6 +7,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +17,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthValidatorUtils {
 
-    public static UUID getAuthenticatedUserId(HttpServletRequest request) {
-        return AuthUtils.getAuthenticatedUserId(request);
+    public static UUID getAuthenticatedUserId() {
+        var attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        Object userIdAttr = request.getAttribute("user_id");
+        if (userIdAttr == null) {
+            throw new IllegalStateException("Usuário não autenticado.");
+        }
+
+        return UUID.fromString(userIdAttr.toString());
     }
 
     public static String getCurrentUserRole() {

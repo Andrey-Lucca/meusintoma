@@ -7,6 +7,7 @@ import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import br.com.meusintoma.modules.user.entity.UserEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -21,5 +22,5 @@ import lombok.experimental.SuperBuilder;
 public class SecretaryEntity extends UserEntity {
 
     @OneToMany(mappedBy = "secretary")
-    private List<DoctorEntity> doctors = new ArrayList<>();
+    @Builder.Default private List<DoctorEntity> doctors = new ArrayList<>();
 }

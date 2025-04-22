@@ -1,0 +1,19 @@
+package br.com.meusintoma.modules.consultation.mapper;
+
+import br.com.meusintoma.modules.consultation.dto.ConsultationResponseDTO;
+import br.com.meusintoma.modules.consultation.entity.ConsultationEntity;
+
+public class ConsultationMapper {
+
+    public static ConsultationResponseDTO toResponseDTO(ConsultationEntity consultation) {
+        ConsultationResponseDTO responseDTO = ConsultationResponseDTO.builder()
+                .date(consultation.getCalendarSlot().getDate())
+                .doctor(consultation.getCalendarSlot().getDoctor().getName())
+                .endAt(consultation.getCalendarSlot().getEndTime())
+                .startedAt(consultation.getCalendarSlot().getStartTime())
+                .patient(consultation.getPatient().getName())
+                .status(consultation.getStatus())
+                .build();
+        return responseDTO;
+    }
+}

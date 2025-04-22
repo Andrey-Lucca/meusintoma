@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.modules.calendar.dto.CalendarResponseDTO;
-import br.com.meusintoma.modules.calendar.dto.UpdateCalendarDTO;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
@@ -39,15 +38,22 @@ public class CalendarService {
                 .map(CalendarMapperDTO::toResponseDTO).toList();
     }
 
-    public CalendarResponseDTO updateCalendarStatus(UUID calendarId, UpdateCalendarDTO calendarDTO) {
+    public CalendarResponseDTO updateCalendarStatus(UUID calendarId, CalendarStatus status) {
         CalendarEntity calendar = calendarRepository.findById(calendarId)
-                .orElseThrow(() -> new CalendarNotFoundException("Horário não encontrado"));
-
-        calendar.setCalendarStatus(calendarDTO.getStatus());
-
+            .orElseThrow(() -> new CalendarNotFoundException("Horário não encontrado"));
+    
+        return updateCalendarStatusAndReturn(calendar, status);
+    }
+    
+    public CalendarResponseDTO updateCalendarStatusAndReturn(CalendarEntity calendar, CalendarStatus status) {
+        calendar.setCalendarStatus(status);
         calendarRepository.save(calendar);
-
         return CalendarMapperDTO.toResponseDTO(calendar);
+    }
+    
+    public void updateCalendarStatus(CalendarEntity calendar, CalendarStatus status) {
+        calendar.setCalendarStatus(status);
+        calendarRepository.save(calendar);
     }
 
     public void deleteCalendarById(UUID calendarId) {

@@ -24,7 +24,6 @@ import br.com.meusintoma.modules.calendar.services.CalendarPermissionService;
 import br.com.meusintoma.modules.calendar.services.CalendarSlotService;
 import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import br.com.meusintoma.modules.doctor.services.DoctorService;
-import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/calendar/bulk")
@@ -41,14 +40,13 @@ public class CalendarBulkController {
 
         @PostMapping("/daily-slots")
         @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
-        public ResponseEntity<Object> createDailySlots(@RequestBody GenerateDailySlotsRequestDTO requestDTO,
-                        HttpServletRequest request) {
+        public ResponseEntity<Object> createDailySlots(@RequestBody GenerateDailySlotsRequestDTO requestDTO) {
                 try {
                         if (!requestDTO.isValid()) {
                                 throw new IllegalArgumentException("Parâmetros inválidos para geração de slots");
                         }
 
-                        calendarPermissionService.validatePermissionCalendar(request, requestDTO.getDoctorId(),
+                        calendarPermissionService.validatePermissionCalendar(requestDTO.getDoctorId(),
                                         Optional.ofNullable(requestDTO.getDate()));
 
                         DoctorEntity doctor = doctorService.findDoctorById(requestDTO.getDoctorId());
@@ -73,12 +71,11 @@ public class CalendarBulkController {
         @PostMapping("weekly-slots")
         @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
         public ResponseEntity<Object> createWeeklySlots(
-                        @RequestBody CalendarWeeklySlotsGenerationDTO requestDTO,
-                        HttpServletRequest request) {
+                        @RequestBody CalendarWeeklySlotsGenerationDTO requestDTO) {
 
                 try {
                         requestDTO.setRequestDate(LocalDate.now());
-                        calendarPermissionService.validatePermissionCalendar(request, requestDTO.getDoctorId(),
+                        calendarPermissionService.validatePermissionCalendar(requestDTO.getDoctorId(),
                                         Optional.ofNullable(requestDTO.getDate()));
 
                         DoctorEntity doctor = doctorService.findDoctorById(requestDTO.getDoctorId());

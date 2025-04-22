@@ -21,7 +21,6 @@ import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.NoDoctorCalendarException;
 import br.com.meusintoma.modules.calendar.services.CalendarPermissionService;
 import br.com.meusintoma.modules.calendar.services.CalendarService;
-import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/calendar")
@@ -50,11 +49,11 @@ public class CalendarController {
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     @PatchMapping("/doctor/{doctorId}/{calendarId}")
     public ResponseEntity<Object> updateCalendarStatus(@PathVariable UUID doctorId, @PathVariable UUID calendarId,
-            @RequestBody UpdateCalendarDTO statusDTO, HttpServletRequest request) {
+            @RequestBody UpdateCalendarDTO statusDto) {
         try {
             calendarService.verifyDoctorHasCalendar(doctorId);
-            calendarPermissionService.validatePermissionCalendar(request, doctorId, Optional.empty());
-            var response = calendarService.updateCalendarStatus(calendarId, statusDTO);
+            calendarPermissionService.validatePermissionCalendar(doctorId, Optional.empty());
+            var response = calendarService.updateCalendarStatus(calendarId, statusDto.getStatus());
             return ResponseEntity.ok().body(response);
 
         } catch (InvalidDateException | CustomAccessDeniedException e) {
@@ -68,11 +67,10 @@ public class CalendarController {
 
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     @DeleteMapping("/doctor/{doctorId}/{calendarId}")
-    public ResponseEntity<Object> deleteCalendarById(@PathVariable UUID calendarId, @PathVariable UUID doctorId,
-            HttpServletRequest request) {
+    public ResponseEntity<Object> deleteCalendarById(@PathVariable UUID calendarId, @PathVariable UUID doctorId) {
         try {
             calendarService.verifyDoctorHasCalendar(doctorId);
-            calendarPermissionService.validatePermissionCalendar(request, doctorId, Optional.empty());
+            calendarPermissionService.validatePermissionCalendar(doctorId, Optional.empty());
             calendarService.deleteCalendarById(calendarId);
             return ResponseEntity.ok().body("Horário removido com sucesso");
         } catch (InvalidDateException | CustomAccessDeniedException e) {
