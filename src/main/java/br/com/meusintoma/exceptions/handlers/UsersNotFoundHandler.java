@@ -4,8 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import br.com.meusintoma.exceptions.globalCustomException.ErrorResponse;
 import br.com.meusintoma.modules.patient.exceptions.PatientNotFoundException;
-import br.com.meusintoma.exceptions.ErrorResponse;
 
 @ControllerAdvice
 public class UsersNotFoundHandler {

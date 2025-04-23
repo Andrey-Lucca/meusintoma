@@ -6,6 +6,11 @@ import br.com.meusintoma.modules.consultation.entity.ConsultationEntity;
 public class ConsultationMapper {
 
     public static ConsultationResponseDTO toResponseDTO(ConsultationEntity consultation) {
+        // String secretaryName = null;
+        // if (consultation.getCalendarSlot().getDoctor() != null
+        //         && consultation.getCalendarSlot().getDoctor().getSecretary() != null) {
+        //     secretaryName = consultation.getCalendarSlot().getDoctor().getSecretary().getName();
+        // }
         ConsultationResponseDTO responseDTO = ConsultationResponseDTO.builder()
                 .date(consultation.getCalendarSlot().getDate())
                 .doctor(consultation.getCalendarSlot().getDoctor().getName())

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
-import br.com.meusintoma.exceptions.UserNotFoundException;
+import br.com.meusintoma.exceptions.globalCustomException.UserNotFoundException;
 import br.com.meusintoma.modules.user.dto.AuthUserRequestDTO;
 import br.com.meusintoma.modules.user.dto.AuthUserResponseDTO;
 import br.com.meusintoma.modules.user.repository.UserRepository;

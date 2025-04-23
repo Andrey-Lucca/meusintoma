@@ -1,13 +1,18 @@
 package br.com.meusintoma.modules.consultation.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
+import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
+import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
 import br.com.meusintoma.modules.calendar.repository.CalendarRepository;
 import br.com.meusintoma.modules.calendar.services.CalendarService;
 import br.com.meusintoma.modules.consultation.dto.ConsultationResponseDTO;
@@ -24,35 +29,67 @@ import static br.com.meusintoma.utils.RepositoryUtils.findOrThrow;
 @Service
 public class ConsultationService {
 
-    @Autowired
-    ConsultationRepository consultationRepository;
+        @Autowired
+        ConsultationRepository consultationRepository;
 
-    @Autowired
-    CalendarRepository calendarRepository;
+        @Autowired
+        CalendarRepository calendarRepository;
 
-    @Autowired
-    PatientRepository patientRepository;
+        @Autowired
+        PatientRepository patientRepository;
 
-    @Autowired
-    CalendarService calendarService;
+        @Autowired
+        CalendarService calendarService;
 
-    public ConsultationResponseDTO createConsultation(UUID calendarId) {
+        public ConsultationResponseDTO createConsultation(UUID calendarId) {
 
-        UUID patientId = AuthValidatorUtils.getAuthenticatedUserId();
-        CalendarEntity calendar = findOrThrow(
-                calendarRepository.findById(calendarId),
-                () -> new CalendarNotFoundException("Horário Indisponível"));
+                UUID patientId = AuthValidatorUtils.getAuthenticatedUserId();
+                CalendarEntity calendar = findOrThrow(
+                                calendarRepository.findByIdWithDoctorAndSecretary(calendarId),
+                                () -> new CalendarNotFoundException("Horário Indisponível"));
+                if (calendar.getCalendarStatus() != CalendarStatus.AVAILABLE) {
+                        throw new UnavaliableTimeException(
+                                        "O horário solicitado já está reservado. Tente outro horário.");
+                }
 
-        PatientEntity patient = findOrThrow(
-                patientRepository.findById(patientId),
-                () -> new PatientNotFoundException("Paciente inválido para essa operação"));
+                PatientEntity patient = findOrThrow(
+                                patientRepository.findById(patientId),
+                                () -> new PatientNotFoundException("Paciente inválido para essa operação"));
 
-        ConsultationEntity consultation = ConsultationEntity.builder().calendarSlot(calendar)
-                .status(ConsultationStatus.PENDING).patient(patient).build();
+                ConsultationEntity consultation = ConsultationEntity.builder().calendarSlot(calendar)
+                                .status(ConsultationStatus.PENDING).patient(patient)
+                                .doctorId(calendar.getDoctor().getId())
+                                .secretaryId(calendar.getDoctor().getSecretary() != null
+                                                ? calendar.getDoctor().getSecretary().getId()
+                                                : null)
+                                .build();
 
-        consultationRepository.save(consultation);
-        calendarService.updateCalendarStatus(calendar, CalendarStatus.UNAVAILABLE);
-        ConsultationResponseDTO consultationResponseDTO = ConsultationMapper.toResponseDTO(consultation);
-        return consultationResponseDTO;
-    }
+                consultationRepository.save(consultation);
+                calendarService.updateCalendarStatus(calendar, CalendarStatus.UNAVAILABLE);
+                ConsultationResponseDTO consultationResponseDTO = ConsultationMapper.toResponseDTO(consultation);
+                return consultationResponseDTO;
+        }
+
+        public List<ConsultationResponseDTO> getConsultations() {
+                UUID userId = AuthValidatorUtils.getAuthenticatedUserId();
+                String userRole = AuthValidatorUtils.getCurrentUserRole();
+                List<ConsultationEntity> consultations = new ArrayList<ConsultationEntity>();
+                switch (userRole) {
+                        case "DOCTOR":
+                                consultations = consultationRepository.findAllByDoctorId(userId);
+                                break;
+                        case "SECRETARY":
+                                consultations = consultationRepository.findAllBySecretaryId(userId);
+                                break;
+                        case "PATIENT":
+                                consultations = consultationRepository.findAllByPatientId(userId);
+                                break;
+                        default:
+                                throw new CustomAccessDeniedException("Você não tem permissões suficientes");
+                }
+                if (consultations.isEmpty()) {
+                        throw new NoContentException("Não existe nada para ser mostrado");
+                }
+                return consultations.stream().map(ConsultationMapper::toResponseDTO).toList();
+        }
 }

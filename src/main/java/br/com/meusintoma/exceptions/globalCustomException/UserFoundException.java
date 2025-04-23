@@ -1,4 +1,4 @@
-package br.com.meusintoma.exceptions;
+package br.com.meusintoma.exceptions.globalCustomException;
 
 public class UserFoundException extends RuntimeException {
     public UserFoundException() {

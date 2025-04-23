@@ -36,6 +36,12 @@ public class ConsultationEntity {
     @Enumerated(EnumType.STRING)
     private ConsultationStatus status;
 
+    @Column(name = "doctor_id", nullable = false, updatable = false)
+    private UUID doctorId;
+
+    @Column(name = "secretary_id", nullable = true, updatable = false)
+    private UUID secretaryId;
+
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private PatientEntity patient;
@@ -49,7 +55,6 @@ public class ConsultationEntity {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
 
     @PrePersist
     protected void onCreate() {

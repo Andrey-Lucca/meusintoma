@@ -2,7 +2,7 @@ package br.com.meusintoma.security.utils;
 
 import java.util.UUID;
 
-import br.com.meusintoma.exceptions.UnauthorizedException;
+import br.com.meusintoma.exceptions.globalCustomException.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class AuthUtils {

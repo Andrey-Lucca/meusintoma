@@ -1,8 +1,9 @@
 package br.com.meusintoma.exceptions.handlers;
 
-import br.com.meusintoma.exceptions.ErrorResponse;
 import br.com.meusintoma.modules.calendar.exceptions.NoDoctorCalendarException;
+import br.com.meusintoma.exceptions.globalCustomException.ErrorResponse;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
+import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class CalendarExceptionHandler {
                 "CALENDAR_NOT_FOUND",
                 ex.getMessage(),
                 "O doutor em questão ainda não possui nenhum calendário cadastrado");
-                return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(CalendarNotFoundException.class)
@@ -26,6 +27,15 @@ public class CalendarExceptionHandler {
                 "CALENDAR_TIME_NOT_FOUND",
                 ex.getMessage(),
                 "Não foi possível excluir esse horário pois não existe no sistema");
-                return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UnavaliableTimeException.class)
+    public ResponseEntity<ErrorResponse> handleUnavaliableTime(UnavaliableTimeException ex) {
+        ErrorResponse error = new ErrorResponse(
+                "UNAVALIABLE_TIME",
+                ex.getMessage(),
+                "Horário Indisponível");
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 }

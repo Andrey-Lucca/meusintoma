@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.meusintoma.exceptions.CustomAccessDeniedException;
-import br.com.meusintoma.exceptions.InvalidDateException;
+import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
+import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
 import br.com.meusintoma.modules.calendar.dto.CalendarResponseDTO;
 import br.com.meusintoma.modules.calendar.dto.CalendarWeeklySlotsGenerationDTO;
 import br.com.meusintoma.modules.calendar.dto.GenerateDailySlotsRequestDTO;

@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import br.com.meusintoma.exceptions.UserFoundException;
+import br.com.meusintoma.exceptions.globalCustomException.UserFoundException;
 import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import br.com.meusintoma.modules.doctor.repository.DoctorRepository;
 import br.com.meusintoma.modules.patient.entity.PatientEntity;

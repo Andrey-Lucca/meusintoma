@@ -2,6 +2,7 @@ package br.com.meusintoma.modules.calendar.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +23,11 @@ public interface CalendarRepository extends JpaRepository<CalendarEntity, UUID> 
     @Query("DELETE FROM calendar c WHERE c.date < :date AND c.calendarStatus IN :statuses")
     void deleteOldCalendarsByStatus(@Param("date") LocalDate date, @Param("statuses") List<CalendarStatus> statuses);
 
+    @Query("""
+                SELECT c FROM calendar c
+                JOIN FETCH c.doctor d
+                LEFT JOIN FETCH d.secretary
+                WHERE c.id = :calendarId
+            """)
+    Optional<CalendarEntity> findByIdWithDoctorAndSecretary(@Param("calendarId") UUID calendarId);
 }

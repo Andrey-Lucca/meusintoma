@@ -4,9 +4,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import br.com.meusintoma.exceptions.InvalidDateException;
-import br.com.meusintoma.exceptions.CustomAccessDeniedException;
-import br.com.meusintoma.exceptions.ErrorResponse;
+
+import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
+import br.com.meusintoma.exceptions.globalCustomException.ErrorResponse;
+import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
+import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -14,20 +16,27 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidDateException.class)
     public ResponseEntity<ErrorResponse> handleInvalidDate(InvalidDateException ex) {
         ErrorResponse error = new ErrorResponse(
-            "INVALIDE_DATE",
-            ex.getMessage(),
-            "Você tentou usar uma data anterior a data atual, e isso ocasionou o erro"
-        );
+                "INVALIDE_DATE",
+                ex.getMessage(),
+                "Você tentou usar uma data anterior a data atual, e isso ocasionou o erro");
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(CustomAccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleCustomAccessDenied(CustomAccessDeniedException ex) {
         ErrorResponse error = new ErrorResponse(
-            "DENIED_ACESS",
-            ex.getMessage(),
-            null
-        );
+                "DENIED_ACESS",
+                ex.getMessage(),
+                null);
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(NoContentException.class)
+    public ResponseEntity<ErrorResponse> handleNoContent(NoContentException ex) {
+        ErrorResponse error = new ErrorResponse(
+                "NO_CONTENT",
+                ex.getMessage(),
+                "Não existe nada a ser exibido");
+        return new ResponseEntity<>(error, HttpStatus.NO_CONTENT);
     }
 }

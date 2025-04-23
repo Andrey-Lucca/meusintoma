@@ -6,8 +6,8 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import br.com.meusintoma.exceptions.CustomAccessDeniedException;
-import br.com.meusintoma.exceptions.InvalidDateException;
+import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
+import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
 import br.com.meusintoma.modules.doctor.repository.DoctorRepository;
 import br.com.meusintoma.modules.secretary.repository.SecretaryRepository;
 
