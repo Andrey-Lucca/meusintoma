@@ -19,6 +19,9 @@ public class AuthValidatorUtils {
 
     public static UUID getAuthenticatedUserId() {
         var attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes == null) {
+            throw new IllegalStateException("Fora de contexto web - nenhuma requisição HTTP encontrada");
+        }
         HttpServletRequest request = attributes.getRequest();
         Object userIdAttr = request.getAttribute("user_id");
         if (userIdAttr == null) {

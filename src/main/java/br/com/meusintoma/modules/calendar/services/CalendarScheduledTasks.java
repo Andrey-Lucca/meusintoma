@@ -17,7 +17,8 @@ public class CalendarScheduledTasks {
     @Autowired
     private CalendarRepository calendarRepository;
 
-    @Scheduled(cron = "0 3 2 * * *")
+    @Scheduled(cron = "0 0 2 * * *")
+    //@Scheduled(cron = "1 * * * * *")
     @Transactional
     public void deleteOldAvaliableAndBlockedSlots() {
         List<CalendarStatus> statuses = List.of(CalendarStatus.AVAILABLE, CalendarStatus.BLOCKED);

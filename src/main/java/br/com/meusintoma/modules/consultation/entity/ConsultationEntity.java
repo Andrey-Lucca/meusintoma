@@ -7,6 +7,7 @@ import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.consultation.enums.ConsultationStatus;
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -36,6 +37,12 @@ public class ConsultationEntity {
     @Enumerated(EnumType.STRING)
     private ConsultationStatus status;
 
+    @Column(updatable = true, nullable = true)
+    private String canceledBy;
+
+    @Embedded
+    private SnapShotInfo snapshot;
+
     @Column(name = "doctor_id", nullable = false, updatable = false)
     private UUID doctorId;
 
@@ -47,7 +54,7 @@ public class ConsultationEntity {
     private PatientEntity patient;
 
     @OneToOne
-    @JoinColumn(name = "calendar_id", nullable = false)
+    @JoinColumn(name = "calendar_id", nullable = true)
     private CalendarEntity calendarSlot;
 
     @Column(name = "created_at", nullable = false, updatable = false)

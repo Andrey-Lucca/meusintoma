@@ -9,6 +9,9 @@ import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedExce
 import br.com.meusintoma.exceptions.globalCustomException.ErrorResponse;
 import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
 import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
+import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
+import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
+
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -38,5 +41,23 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 "Não existe nada a ser exibido");
         return new ResponseEntity<>(error, HttpStatus.NO_CONTENT);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> notFound(NotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+                "ITEM_NOT_FOUND",
+                ex.getMessage(),
+                "Não foi possível encontrar o item solicitado");
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UnalterableException.class)
+    public ResponseEntity<ErrorResponse> unalterableException(UnalterableException ex) {
+        ErrorResponse error = new ErrorResponse(
+                "ITEM_NOT_ALTERABLE",
+                ex.getMessage(),
+                "Não foi possível alterar este item, verifique sua condição");
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 }
