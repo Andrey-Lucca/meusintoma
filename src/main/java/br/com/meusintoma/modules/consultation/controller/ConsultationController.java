@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
 import br.com.meusintoma.modules.consultation.dto.ConsultationCanceledResponseDTO;
 import br.com.meusintoma.modules.consultation.dto.ConsultationResponseDTO;
 import br.com.meusintoma.modules.consultation.dto.CreateConsultationDTO;
+import br.com.meusintoma.modules.consultation.dto.RescheduleConsultationDTO;
 import br.com.meusintoma.modules.consultation.services.ConsultationService;
 import br.com.meusintoma.modules.patient.exceptions.PatientNotFoundException;
 
@@ -62,6 +64,22 @@ public class ConsultationController {
             throw e;
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Algo deu errado ao exibir as consultas");
+        }
+    }
+
+    @PutMapping("/{consultationId}/reschedule")
+    public ResponseEntity<Object> rescheduleConsultation(@PathVariable UUID consultationId,
+            @RequestBody RescheduleConsultationDTO rescheduleDTO) {
+        try {
+            ConsultationResponseDTO updated = consultationService.reschedule(consultationId, rescheduleDTO);
+            return ResponseEntity.ok().body(updated);
+        } catch (NotFoundException | CustomAccessDeniedException e) {
+            throw e;
+        } catch (UnalterableException e) {
+            throw e;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Algo deu errado ao cancelar a consulta");
         }
     }
 

@@ -22,6 +22,7 @@ import br.com.meusintoma.modules.calendar.repository.CalendarRepository;
 import br.com.meusintoma.modules.calendar.services.CalendarService;
 import br.com.meusintoma.modules.consultation.dto.ConsultationCanceledResponseDTO;
 import br.com.meusintoma.modules.consultation.dto.ConsultationResponseDTO;
+import br.com.meusintoma.modules.consultation.dto.RescheduleConsultationDTO;
 import br.com.meusintoma.modules.consultation.entity.ConsultationEntity;
 import br.com.meusintoma.modules.consultation.entity.SnapShotInfo;
 import br.com.meusintoma.modules.consultation.enums.ConsultationStatus;
@@ -58,7 +59,8 @@ public class ConsultationService {
                                 calendarRepository.findByIdWithDoctorAndSecretary(calendarId),
                                 () -> new CalendarNotFoundException("Horário Indisponível"));
                 if (calendar.getCalendarStatus() != CalendarStatus.AVAILABLE
-                                || SystemClockUtils.getCurrentTime().isAfter(calendar.getStartTime().minusHours(2))) {
+                                || (SystemClockUtils.getCurrentDate().isAfter(calendar.getDate()) && SystemClockUtils
+                                                .getCurrentTime().isAfter(calendar.getStartTime().minusHours(2)))) {
                         throw new UnavaliableTimeException(
                                         "O horário se encontra indisponível.");
                 }
@@ -121,11 +123,11 @@ public class ConsultationService {
                 LocalTime timeSystem = SystemClockUtils.getCurrentTime();
                 LocalDate dateSystem = SystemClockUtils.getCurrentDate();
 
-                boolean isTimeAvailable = consultationTime.minusHours(2).isAfter(timeSystem);
+                if (consultationDate.isEqual(dateSystem)) {
+                        return consultationTime.minusHours(2).isAfter(timeSystem);
+                }
 
-                boolean isDateAvailable = !dateSystem.isAfter(consultationDate);
-
-                return isTimeAvailable && isDateAvailable;
+                return consultationDate.isAfter(dateSystem);
         }
 
         public void persistChanges(ConsultationEntity consultation) {
@@ -167,6 +169,40 @@ public class ConsultationService {
                 if (consultation.getStatus() != ConsultationStatus.PENDING) {
                         throw new UnalterableException("Consulta");
                 }
+        }
+
+        public void updateConsultationStatus(ConsultationEntity consultation, CalendarEntity calendar,
+                        ConsultationStatus status) {
+                consultation.setCalendarSlot(calendar);
+                consultation.setStatus(status);
+                persistChanges(consultation);
+                calendarService.updateCalendarStatus(calendar, CalendarStatus.UNAVAILABLE);
+        }
+
+        public ConsultationResponseDTO reschedule(UUID consultationId, RescheduleConsultationDTO rescheduleDTO) {
+                UUID userId = AuthValidatorUtils.getAuthenticatedUserId();
+
+                ConsultationEntity consultation = RepositoryUtils.findOrThrow(
+                                consultationRepository.findById(consultationId),
+                                () -> new NotFoundException("Consulta"));
+
+                CalendarEntity calendar = findOrThrow(
+                                calendarRepository.findByIdWithDoctorAndSecretary(rescheduleDTO.getNewCalendarId()),
+                                () -> new CalendarNotFoundException("Horário Indisponível"));
+
+                validateUserPermission(userId, consultation);
+                checkConsultationStatus(consultation);
+
+                if (dateAndHourAvaliable(consultation.getCalendarSlot().getDate(),
+                                consultation.getCalendarSlot().getStartTime())) {
+                        calendarService.updateCalendarStatus(consultation.getCalendarSlot(),
+                                        CalendarStatus.AVAILABLE);
+                }
+
+                updateConsultationStatus(consultation, calendar, ConsultationStatus.RESCHEDULED);
+
+                return ConsultationMapper.toResponseDTO(consultation);
+
         }
 
         public ConsultationCanceledResponseDTO cancelConsultation(UUID consultationId) {

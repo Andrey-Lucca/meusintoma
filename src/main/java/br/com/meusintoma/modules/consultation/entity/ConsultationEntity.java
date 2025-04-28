@@ -32,6 +32,7 @@ import lombok.NoArgsConstructor;
 public class ConsultationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "uuid")
     private UUID id;
 
     @Enumerated(EnumType.STRING)

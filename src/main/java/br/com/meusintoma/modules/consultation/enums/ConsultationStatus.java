@@ -5,5 +5,6 @@ public enum ConsultationStatus {
     CONFIRMED,
     CANCELLED,
     COMPLETED,
-    EXPIRED
+    EXPIRED,
+    RESCHEDULED
 }
