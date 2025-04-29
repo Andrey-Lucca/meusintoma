@@ -13,6 +13,7 @@ import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.NoDoctorCalendarException;
+import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
 import br.com.meusintoma.modules.calendar.mapper.CalendarMapperDTO;
 import br.com.meusintoma.modules.calendar.repository.CalendarRepository;
 
@@ -40,17 +41,17 @@ public class CalendarService {
 
     public CalendarResponseDTO updateCalendarStatus(UUID calendarId, CalendarStatus status) {
         CalendarEntity calendar = calendarRepository.findById(calendarId)
-            .orElseThrow(() -> new CalendarNotFoundException("Horário não encontrado"));
-    
+                .orElseThrow(() -> new CalendarNotFoundException("Horário não encontrado"));
+
         return updateCalendarStatusAndReturn(calendar, status);
     }
-    
+
     public CalendarResponseDTO updateCalendarStatusAndReturn(CalendarEntity calendar, CalendarStatus status) {
         calendar.setCalendarStatus(status);
         calendarRepository.save(calendar);
         return CalendarMapperDTO.toResponseDTO(calendar);
     }
-    
+
     public void updateCalendarStatus(CalendarEntity calendar, CalendarStatus status) {
         calendar.setCalendarStatus(status);
         calendarRepository.save(calendar);
@@ -60,5 +61,11 @@ public class CalendarService {
         CalendarEntity calendar = calendarRepository.findById(calendarId)
                 .orElseThrow(() -> new CalendarNotFoundException("Calendário não encontrado"));
         calendarRepository.delete(calendar);
+    }
+
+    public static void checkCalendarStatusAndHour(CalendarStatus status, boolean isDateAndHourWithInPeriod) {
+        if (status != CalendarStatus.AVAILABLE || !isDateAndHourWithInPeriod) {
+            throw new UnavaliableTimeException("O horário se encontra indisponível");
+        }
     }
 }

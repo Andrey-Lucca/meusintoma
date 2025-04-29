@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
-import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
 import br.com.meusintoma.modules.calendar.repository.CalendarRepository;
 import br.com.meusintoma.modules.calendar.services.CalendarService;
 import br.com.meusintoma.modules.consultation.dto.ConsultationCanceledResponseDTO;
@@ -52,18 +50,26 @@ public class ConsultationService {
         @Autowired
         CalendarService calendarService;
 
-        public ConsultationResponseDTO createConsultation(UUID calendarId) {
+        @Autowired
+        ConsultationUtilsService consultationUtilsService;
 
+        private ConsultationEntity findConsultation(UUID consultationId) {
+                ConsultationEntity consultation = RepositoryUtils.findOrThrow(
+                                consultationRepository.findById(consultationId),
+                                () -> new NotFoundException("Consulta"));
+                return consultation;
+        }
+
+        public ConsultationResponseDTO createConsultation(UUID calendarId) {
                 UUID patientId = AuthValidatorUtils.getAuthenticatedUserId();
                 CalendarEntity calendar = findOrThrow(
                                 calendarRepository.findByIdWithDoctorAndSecretary(calendarId),
                                 () -> new CalendarNotFoundException("Horário Indisponível"));
-                if (calendar.getCalendarStatus() != CalendarStatus.AVAILABLE
-                                || (SystemClockUtils.getCurrentDate().isAfter(calendar.getDate()) && SystemClockUtils
-                                                .getCurrentTime().isAfter(calendar.getStartTime().minusHours(2)))) {
-                        throw new UnavaliableTimeException(
-                                        "O horário se encontra indisponível.");
-                }
+
+                boolean isDateAndHourWithInPeriod = consultationUtilsService.dateAndHourAvaliable(calendar.getDate(),
+                                calendar.getStartTime());
+
+                CalendarService.checkCalendarStatusAndHour(CalendarStatus.AVAILABLE, isDateAndHourWithInPeriod);
 
                 PatientEntity patient = findOrThrow(
                                 patientRepository.findById(patientId),
@@ -86,7 +92,7 @@ public class ConsultationService {
                                 .build();
 
                 consultationRepository.save(consultation);
-                calendarService.updateCalendarStatus(calendar, CalendarStatus.UNAVAILABLE);
+                consultationUtilsService.changeCalendarStatus(consultation, CalendarStatus.UNAVAILABLE);
                 ConsultationResponseDTO consultationResponseDTO = ConsultationMapper.toResponseDTO(consultation);
                 return consultationResponseDTO;
         }
@@ -114,74 +120,15 @@ public class ConsultationService {
                 return consultations.stream().filter(consultation -> {
                         LocalDate date = consultation.getCalendarSlot().getDate();
                         LocalTime time = consultation.getCalendarSlot().getStartTime();
-                        return !date.isBefore(SystemClockUtils.getCurrentDate())
-                                        && !time.isBefore(SystemClockUtils.getCurrentTime());
+                        if (date.equals(SystemClockUtils.getCurrentDate())) {
+                                return !date.isBefore(SystemClockUtils.getCurrentDate())
+                                                && !time.isBefore(SystemClockUtils.getCurrentTime());
+                        }
+                        return !date.isBefore(SystemClockUtils.getCurrentDate());
                 }).map(ConsultationMapper::toResponseDTO).toList();
         }
 
-        public boolean dateAndHourAvaliable(LocalDate consultationDate, LocalTime consultationTime) {
-                LocalTime timeSystem = SystemClockUtils.getCurrentTime();
-                LocalDate dateSystem = SystemClockUtils.getCurrentDate();
-
-                if (consultationDate.isEqual(dateSystem)) {
-                        return consultationTime.minusHours(2).isAfter(timeSystem);
-                }
-
-                return consultationDate.isAfter(dateSystem);
-        }
-
-        public void persistChanges(ConsultationEntity consultation) {
-                consultationRepository.save(consultation);
-        }
-
-        public Optional<UUID> returnUserId(UUID userId) {
-                return Optional.ofNullable(userId);
-        }
-
-        private void validateUserPermission(UUID userId, ConsultationEntity consultation) {
-                List<UUID> allowedIds = new ArrayList<>();
-                returnUserId(consultation.getDoctorId()).ifPresent(allowedIds::add);
-                returnUserId(consultation.getPatient().getId()).ifPresent(allowedIds::add);
-                returnUserId(consultation.getSecretaryId()).ifPresent(allowedIds::add);
-
-                if (!allowedIds.contains(userId)) {
-                        throw new CustomAccessDeniedException("Você não pode realizar essa operação");
-                }
-        }
-
-        private SnapShotInfo createSnapshot(ConsultationEntity consultation) {
-                SnapShotInfo snapshot = SnapShotInfo.builder().date(consultation.getCalendarSlot().getDate())
-                                .endTime(consultation.getCalendarSlot().getEndTime())
-                                .startTime(consultation.getCalendarSlot().getStartTime()).build();
-                return snapshot;
-        }
-
-        private void cancelConsultation(ConsultationEntity consultation, SnapShotInfo snapshot, UUID userId) {
-                consultation.setCalendarSlot(null);
-                consultation.setSnapshot(snapshot);
-                consultation.setStatus(ConsultationStatus.CANCELLED);
-                consultation.setCanceledBy(AuthValidatorUtils.getCurrentUserRole());
-
-                persistChanges(consultation);
-        }
-
-        private void checkConsultationStatus(ConsultationEntity consultation) {
-                if (consultation.getStatus() != ConsultationStatus.PENDING) {
-                        throw new UnalterableException("Consulta");
-                }
-        }
-
-        public void updateConsultationStatus(ConsultationEntity consultation, CalendarEntity calendar,
-                        ConsultationStatus status) {
-                consultation.setCalendarSlot(calendar);
-                consultation.setStatus(status);
-                persistChanges(consultation);
-                calendarService.updateCalendarStatus(calendar, CalendarStatus.UNAVAILABLE);
-        }
-
         public ConsultationResponseDTO reschedule(UUID consultationId, RescheduleConsultationDTO rescheduleDTO) {
-                UUID userId = AuthValidatorUtils.getAuthenticatedUserId();
-
                 ConsultationEntity consultation = RepositoryUtils.findOrThrow(
                                 consultationRepository.findById(consultationId),
                                 () -> new NotFoundException("Consulta"));
@@ -190,40 +137,40 @@ public class ConsultationService {
                                 calendarRepository.findByIdWithDoctorAndSecretary(rescheduleDTO.getNewCalendarId()),
                                 () -> new CalendarNotFoundException("Horário Indisponível"));
 
-                validateUserPermission(userId, consultation);
-                checkConsultationStatus(consultation);
-
-                if (dateAndHourAvaliable(consultation.getCalendarSlot().getDate(),
-                                consultation.getCalendarSlot().getStartTime())) {
-                        calendarService.updateCalendarStatus(consultation.getCalendarSlot(),
-                                        CalendarStatus.AVAILABLE);
-                }
-
-                updateConsultationStatus(consultation, calendar, ConsultationStatus.RESCHEDULED);
-
+                consultationUtilsService.checkStatusAndPermissions(consultation);
+                consultationUtilsService.changeCalendarStatus(consultation, CalendarStatus.AVAILABLE);
+                consultationUtilsService.updateConsultationStatusAndCalendar(consultation, calendar,
+                                ConsultationStatus.RESCHEDULED);
                 return ConsultationMapper.toResponseDTO(consultation);
 
         }
 
-        public ConsultationCanceledResponseDTO cancelConsultation(UUID consultationId) {
-                UUID userId = AuthValidatorUtils.getAuthenticatedUserId();
+        public ConsultationResponseDTO changeConsultationStatus(UUID consultationId, ConsultationStatus status) {
+                consultationUtilsService.checkUserAction(status);
+                ConsultationEntity consultation = findConsultation(consultationId);
+                consultationUtilsService.checkStatusAndPermissions(consultation);
+                boolean isDateAndHourWithInPeriod = consultationUtilsService.dateAndHourAvaliable(
+                                consultation.getCalendarSlot().getDate(),
+                                consultation.getCalendarSlot().getStartTime());
+                if (!isDateAndHourWithInPeriod && status != ConsultationStatus.CONFIRMED) {
+                        throw new UnalterableException("Consulta");
+                }
+                consultation.setStatus(status);
+                consultationRepository.save(consultation);
+                return ConsultationMapper.toResponseDTO(consultation);
+        }
 
+        public ConsultationCanceledResponseDTO cancelConsultation(UUID consultationId) {
                 ConsultationEntity consultation = RepositoryUtils.findOrThrow(
                                 consultationRepository.findById(consultationId),
                                 () -> new NotFoundException("Consulta"));
 
-                validateUserPermission(userId, consultation);
-                checkConsultationStatus(consultation);
+                consultationUtilsService.checkStatusAndPermissions(consultation);
 
-                SnapShotInfo snapshot = createSnapshot(consultation);
+                SnapShotInfo snapshot = consultationUtilsService.createSnapshot(consultation);
 
-                if (dateAndHourAvaliable(consultation.getCalendarSlot().getDate(),
-                                consultation.getCalendarSlot().getStartTime())) {
-                        calendarService.updateCalendarStatus(consultation.getCalendarSlot(), CalendarStatus.AVAILABLE);
-                }
-
-                cancelConsultation(consultation, snapshot, userId);
-
+                consultationUtilsService.changeCalendarStatus(consultation, CalendarStatus.AVAILABLE);
+                consultationUtilsService.cancelConsultation(consultation, snapshot);
                 return ConsultationMapper.toCanceledResponseDTO(consultation);
         }
 }

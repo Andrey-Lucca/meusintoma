@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,6 +22,7 @@ import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
+import br.com.meusintoma.modules.consultation.dto.ChangeConsultationStatusDTO;
 import br.com.meusintoma.modules.consultation.dto.ConsultationCanceledResponseDTO;
 import br.com.meusintoma.modules.consultation.dto.ConsultationResponseDTO;
 import br.com.meusintoma.modules.consultation.dto.CreateConsultationDTO;
@@ -49,7 +51,6 @@ public class ConsultationController {
         } catch (PatientNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Algo deu errado ao criar as consultas");
         }
     }
@@ -59,11 +60,26 @@ public class ConsultationController {
         try {
             List<ConsultationResponseDTO> consultations = consultationService.getConsultations();
             return ResponseEntity.ok().body(consultations);
-
         } catch (NoContentException e) {
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Algo deu errado ao exibir as consultas");
+        }
+    }
+
+    @PatchMapping("/{consultationId}")
+    public ResponseEntity<Object> changeConsultationStatus(@PathVariable UUID consultationId, @RequestBody ChangeConsultationStatusDTO statusDTO){
+        try {
+            ConsultationResponseDTO updated = consultationService.changeConsultationStatus(consultationId, statusDTO.getStatus());
+            return ResponseEntity.ok().body(updated);
+        } catch (NotFoundException | CustomAccessDeniedException e) {
+            throw e;
+        } catch (UnalterableException e) {
+            throw e;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Algo deu errado ao cancelar a consulta");
         }
     }
 
