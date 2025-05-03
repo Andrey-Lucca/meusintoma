@@ -26,6 +26,6 @@ public interface ConsultationRepository extends JpaRepository<ConsultationEntity
     List<ConsultationEntity> findExpiredConsultations(@Param("today") LocalDate today, @Param("now") LocalTime now);
 
     @Modifying
-    @Query("DELETE FROM consultation c WHERE c.status = :status")
-    void deleteExpiredConsultations(@Param("status") ConsultationStatus status);
+    @Query("DELETE FROM consultation c WHERE c.status IN :status")
+    void deleteExpiredConsultations(@Param("status") List<ConsultationStatus> status);
 }

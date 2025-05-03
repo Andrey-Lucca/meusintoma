@@ -5,8 +5,10 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import br.com.meusintoma.modules.doctor.repository.DoctorRepository;
+import br.com.meusintoma.utils.RepositoryUtils;
 
 @Service
 public class DoctorService {
@@ -14,8 +16,9 @@ public class DoctorService {
     @Autowired
     DoctorRepository doctorRepository;
 
-    public DoctorEntity findDoctorById(UUID doctorId){
-        var doctor = this.doctorRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("Não foi possível localizar o doutor"));
+    public DoctorEntity findDoctor(UUID doctorId) {
+        DoctorEntity doctor = RepositoryUtils.findOrThrow(doctorRepository.findById(doctorId),
+                () -> new NotFoundException("Paciente"));
         return doctor;
     }
 }

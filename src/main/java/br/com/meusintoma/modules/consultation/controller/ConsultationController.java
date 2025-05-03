@@ -27,6 +27,7 @@ import br.com.meusintoma.modules.consultation.dto.ConsultationCanceledResponseDT
 import br.com.meusintoma.modules.consultation.dto.ConsultationResponseDTO;
 import br.com.meusintoma.modules.consultation.dto.CreateConsultationDTO;
 import br.com.meusintoma.modules.consultation.dto.RescheduleConsultationDTO;
+import br.com.meusintoma.modules.consultation.exceptions.AlreadyHaveConsultationException;
 import br.com.meusintoma.modules.consultation.services.ConsultationService;
 import br.com.meusintoma.modules.patient.exceptions.PatientNotFoundException;
 
@@ -37,7 +38,7 @@ public class ConsultationController {
     @Autowired
     private ConsultationService consultationService;
 
-    @PostMapping("/")
+    @PostMapping
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> createConsultation(@RequestBody CreateConsultationDTO consultationDto) {
         try {
@@ -50,12 +51,15 @@ public class ConsultationController {
             throw e;
         } catch (PatientNotFoundException e) {
             throw e;
-        } catch (Exception e) {
+        }catch(AlreadyHaveConsultationException e){
+            throw e;
+        } 
+        catch (Exception e) {
             return ResponseEntity.internalServerError().body("Algo deu errado ao criar as consultas");
         }
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<Object> getConsultations() {
         try {
             List<ConsultationResponseDTO> consultations = consultationService.getConsultations();

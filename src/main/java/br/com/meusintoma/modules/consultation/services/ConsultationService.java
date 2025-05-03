@@ -81,6 +81,10 @@ public class ConsultationService {
                                 .endTime(null)
                                 .build();
 
+                List<ConsultationEntity> consultations = consultationRepository.findAllByPatientId(patientId);
+
+                consultationUtilsService.alredyHaveConsultation(consultations, calendar.getDoctor().getId());
+
                 ConsultationEntity consultation = ConsultationEntity.builder().calendarSlot(calendar)
                                 .status(ConsultationStatus.PENDING).patient(patient)
                                 .doctorId(calendar.getDoctor().getId())
@@ -101,6 +105,7 @@ public class ConsultationService {
                 UUID userId = AuthValidatorUtils.getAuthenticatedUserId();
                 String userRole = AuthValidatorUtils.getCurrentUserRole();
                 List<ConsultationEntity> consultations = new ArrayList<ConsultationEntity>();
+
                 switch (userRole) {
                         case "DOCTOR":
                                 consultations = consultationRepository.findAllByDoctorId(userId);
@@ -117,15 +122,30 @@ public class ConsultationService {
                 if (consultations.isEmpty()) {
                         throw new NoContentException("Não existe nada para ser mostrado");
                 }
-                return consultations.stream().filter(consultation -> {
-                        LocalDate date = consultation.getCalendarSlot().getDate();
-                        LocalTime time = consultation.getCalendarSlot().getStartTime();
-                        if (date.equals(SystemClockUtils.getCurrentDate())) {
-                                return !date.isBefore(SystemClockUtils.getCurrentDate())
-                                                && !time.isBefore(SystemClockUtils.getCurrentTime());
-                        }
-                        return !date.isBefore(SystemClockUtils.getCurrentDate());
-                }).map(ConsultationMapper::toResponseDTO).toList();
+                return consultations.stream()
+                                .filter(consultation -> {
+                                        LocalDate date;
+                                        LocalTime time;
+
+                                        if (consultation.getStatus() == ConsultationStatus.CANCELLED
+                                                        || consultation.getCalendarSlot() == null) {
+                                                date = consultation.getSnapshot().getDate();
+                                                time = consultation.getSnapshot().getStartTime();
+                                        } else {
+                                                date = consultation.getCalendarSlot().getDate();
+                                                time = consultation.getCalendarSlot().getStartTime();
+                                        }
+
+                                        LocalDate today = SystemClockUtils.getCurrentDate();
+                                        LocalTime now = SystemClockUtils.getCurrentTime();
+
+                                        if (date.equals(today)) {
+                                                return !time.isBefore(now);
+                                        }
+                                        return date.isAfter(today);
+                                })
+                                .map(ConsultationMapper::toResponseDTO)
+                                .toList();
         }
 
         public ConsultationResponseDTO reschedule(UUID consultationId, RescheduleConsultationDTO rescheduleDTO) {

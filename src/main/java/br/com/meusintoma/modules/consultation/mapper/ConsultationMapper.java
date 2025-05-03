@@ -1,25 +1,43 @@
 package br.com.meusintoma.modules.consultation.mapper;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import br.com.meusintoma.modules.consultation.dto.ConsultationCanceledResponseDTO;
 import br.com.meusintoma.modules.consultation.dto.ConsultationResponseDTO;
 import br.com.meusintoma.modules.consultation.entity.ConsultationEntity;
+import br.com.meusintoma.modules.consultation.enums.ConsultationStatus;
 
 public class ConsultationMapper {
 
     public static ConsultationResponseDTO toResponseDTO(ConsultationEntity consultation) {
-        // String secretaryName = null;
-        // if (consultation.getCalendarSlot().getDoctor() != null
-        //         && consultation.getCalendarSlot().getDoctor().getSecretary() != null) {
-        //     secretaryName = consultation.getCalendarSlot().getDoctor().getSecretary().getName();
-        // }
+        boolean isCancelled = consultation.getStatus() == ConsultationStatus.CANCELLED;
+
+        LocalDate date = isCancelled
+                ? consultation.getSnapshot().getDate()
+                : consultation.getCalendarSlot().getDate();
+
+        LocalTime startedAt = isCancelled
+                ? consultation.getSnapshot().getStartTime()
+                : consultation.getCalendarSlot().getStartTime();
+
+        LocalTime endAt = isCancelled
+                ? consultation.getSnapshot().getEndTime()
+                : consultation.getCalendarSlot().getEndTime();
+
+        String doctorName = isCancelled
+                ? null
+                : consultation.getCalendarSlot().getDoctor().getName();
+
         ConsultationResponseDTO responseDTO = ConsultationResponseDTO.builder()
-                .date(consultation.getCalendarSlot().getDate())
-                .doctor(consultation.getCalendarSlot().getDoctor().getName())
-                .endAt(consultation.getCalendarSlot().getEndTime())
-                .startedAt(consultation.getCalendarSlot().getStartTime())
+                .date(date)
+                .startedAt(startedAt)
+                .endAt(endAt)
+                .doctor(doctorName)
                 .patient(consultation.getPatient().getName())
                 .status(consultation.getStatus())
                 .build();
+
         return responseDTO;
     }
 

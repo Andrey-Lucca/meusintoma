@@ -49,7 +49,7 @@ public class CalendarBulkController {
                         calendarPermissionService.validatePermissionCalendar(requestDTO.getDoctorId(),
                                         Optional.ofNullable(requestDTO.getDate()));
 
-                        DoctorEntity doctor = doctorService.findDoctorById(requestDTO.getDoctorId());
+                        DoctorEntity doctor = doctorService.findDoctor(requestDTO.getDoctorId());
 
                         GenerateDailySlotsRequestDTO slotsRequest = CalendarMapperDTO.toDailyDto(requestDTO);
 
@@ -78,7 +78,7 @@ public class CalendarBulkController {
                         calendarPermissionService.validatePermissionCalendar(requestDTO.getDoctorId(),
                                         Optional.ofNullable(requestDTO.getDate()));
 
-                        DoctorEntity doctor = doctorService.findDoctorById(requestDTO.getDoctorId());
+                        DoctorEntity doctor = doctorService.findDoctor(requestDTO.getDoctorId());
 
                         List<GenerateDailySlotsRequestDTO> weeklySlots = calendarSlotService.generateWeeklySlots(doctor,
                                         requestDTO);

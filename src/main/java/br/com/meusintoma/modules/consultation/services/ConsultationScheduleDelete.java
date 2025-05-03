@@ -1,5 +1,8 @@
 package br.com.meusintoma.modules.consultation.services;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -17,8 +20,8 @@ public class ConsultationScheduleDelete {
     //@Scheduled(cron = "5 * * * * *")
     @Transactional
     public void deleteExpiredConsultation() {
-        ConsultationStatus status = ConsultationStatus.EXPIRED;
-        consultationRepository.deleteExpiredConsultations(status);
+        List<ConsultationStatus> statuses = new ArrayList<>(List.of(ConsultationStatus.EXPIRED, ConsultationStatus.CANCELLED));
+        consultationRepository.deleteExpiredConsultations(statuses);
     }
 
 }

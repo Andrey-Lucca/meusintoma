@@ -18,6 +18,7 @@ import br.com.meusintoma.modules.calendar.services.CalendarService;
 import br.com.meusintoma.modules.consultation.entity.ConsultationEntity;
 import br.com.meusintoma.modules.consultation.entity.SnapShotInfo;
 import br.com.meusintoma.modules.consultation.enums.ConsultationStatus;
+import br.com.meusintoma.modules.consultation.exceptions.AlreadyHaveConsultationException;
 import br.com.meusintoma.modules.consultation.repository.ConsultationRepository;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
 import br.com.meusintoma.utils.SystemClockUtils;
@@ -30,6 +31,11 @@ public class ConsultationUtilsService {
 
     @Autowired
     ConsultationRepository consultationRepository;
+
+    private List<ConsultationStatus> statuses = new ArrayList<>(List.of(
+            ConsultationStatus.PENDING,
+            ConsultationStatus.CONFIRMED,
+            ConsultationStatus.RESCHEDULED));
 
     public void persistChanges(ConsultationEntity consultation) {
         consultationRepository.save(consultation);
@@ -69,7 +75,7 @@ public class ConsultationUtilsService {
         return snapshot;
     }
 
-    public void checkConsultationStatus(ConsultationEntity consultation, List<ConsultationStatus> statuses) {
+    public void checkConsultationStatus(ConsultationEntity consultation) {
         if (!statuses.contains(consultation.getStatus())) {
             throw new UnalterableException("Consulta");
         }
@@ -88,13 +94,8 @@ public class ConsultationUtilsService {
     }
 
     public void checkStatusAndPermissions(ConsultationEntity consultation) {
-        List<ConsultationStatus> statuses = new ArrayList<>(List.of(
-                ConsultationStatus.PENDING,
-                ConsultationStatus.CONFIRMED,
-                ConsultationStatus.RESCHEDULED));
-
         validateUserPermission(consultation);
-        checkConsultationStatus(consultation, statuses);
+        checkConsultationStatus(consultation);
     }
 
     public void changeCalendarStatus(ConsultationEntity consultation, CalendarStatus status) {
@@ -120,5 +121,15 @@ public class ConsultationUtilsService {
         consultation.setStatus(status);
         persistChanges(consultation);
         changeCalendarStatus(consultation, CalendarStatus.UNAVAILABLE);
+    }
+
+    public void alredyHaveConsultation(List<ConsultationEntity> consultations, UUID doctorId) {
+
+        boolean exists = consultations.stream()
+                .anyMatch(c -> c.getDoctorId().equals(doctorId) && statuses.contains(c.getStatus()));
+
+        if (exists) {
+            throw new AlreadyHaveConsultationException("Consulta já marcada com esse médico");
+        }
     }
 }
