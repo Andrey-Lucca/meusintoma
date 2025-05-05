@@ -21,4 +21,5 @@ public class PatientService {
                 () -> new NotFoundException("Paciente"));
         return patient;
     }
+
 }

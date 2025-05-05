@@ -57,6 +57,16 @@ public class DoctorPatientInvitationService {
         doctorPatientRepository.save(doctorPatientInvite);
         DoctorPatientInviteDTO doctorPatientInviteDTO = DoctorPatientMapper.createInviteDTO(doctorPatientInvite);
         return doctorPatientInviteDTO;
-        //Fazer um validador de status - accepted ou rejected
+    }
+
+    public DoctorPatientInviteDTO disassociateByDoctor(UUID inviteId, ChangeInviteStatusDTO changeStatusDTO) {
+        UUID doctorId = AuthValidatorUtils.getAuthenticatedUserId();
+        DoctorPatientEntity doctorPatientRelationship = findDoctorPatientEntity(inviteId);
+        GenericUtils.compareId(doctorPatientRelationship.getDoctor().getId(), doctorId);
+        DoctorPatientUtilsService.checkDoctorStatus(changeStatusDTO.getStatus());
+        doctorPatientRelationship.setStatus(changeStatusDTO.getStatus());
+        doctorPatientRepository.save(doctorPatientRelationship);
+        DoctorPatientInviteDTO doctorPatientInviteDTO = DoctorPatientMapper.createInviteDTO(doctorPatientRelationship);
+        return doctorPatientInviteDTO;
     }
 }

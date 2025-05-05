@@ -16,6 +16,7 @@ import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedExce
 import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.doctorPatient.dto.ChangeInviteStatusDTO;
 import br.com.meusintoma.modules.doctorPatient.dto.DoctorPatientInviteDTO;
+import br.com.meusintoma.modules.doctorPatient.exceptions.DoctorPatientNotValidStatusException;
 import br.com.meusintoma.modules.doctorPatient.services.DoctorPatientInvitationService;
 
 @RestController
@@ -38,7 +39,7 @@ public class DoctorPatientInvitationController {
         }
     }
 
-    @PatchMapping("/{inviteId}")
+    @PatchMapping("/{inviteId}/patient-status")
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> respondToInvite(@PathVariable UUID inviteId,
             @RequestBody ChangeInviteStatusDTO statusDTO) {
@@ -49,7 +50,27 @@ public class DoctorPatientInvitationController {
             throw e;
         } catch (NotFoundException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (DoctorPatientNotValidStatusException e) {
+            throw e;
+        }catch (Exception e) {
+            return ResponseEntity.status(500).body("Something goes wrong on update the invite");
+        }
+    }
+
+    @PatchMapping("/{inviteId}/doctor-status")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<Object> disassociateByDoctor(@PathVariable UUID inviteId,
+            @RequestBody ChangeInviteStatusDTO statusDTO) {
+        try {
+            DoctorPatientInviteDTO updatedInvite = doctorPatientInvitationService.disassociateByDoctor(inviteId, statusDTO);
+            return ResponseEntity.ok().body(updatedInvite);
+        } catch (CustomAccessDeniedException e) {
+            throw e;
+        } catch (NotFoundException e) {
+            throw e;
+        } catch (DoctorPatientNotValidStatusException e) {
+            throw e;
+        }catch (Exception e) {
             return ResponseEntity.status(500).body("Something goes wrong on update the invite");
         }
     }
