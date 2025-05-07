@@ -12,6 +12,9 @@ public class DoctorRelationshipMapper {
         return doctorsPatientRelationship.stream().map(doctorPatientRelationship -> DoctorRelationshipDTO.builder()
                 .relationshipId(doctorPatientRelationship.getId())
                 .patientName(doctorPatientRelationship.getPatient().getName())
-                .associatedDate(doctorPatientRelationship.getAssociatedDate()).build()).toList();
+                .associatedDate(doctorPatientRelationship.getAssociatedDate())
+                .doctorId(doctorPatientRelationship.getDoctor().getId())
+                .patientId(doctorPatientRelationship.getPatient().getId())
+                .build()).toList();
     }
 }

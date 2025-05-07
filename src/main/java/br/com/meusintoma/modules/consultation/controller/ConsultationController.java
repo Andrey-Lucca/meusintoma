@@ -23,11 +23,13 @@ import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
 import br.com.meusintoma.modules.consultation.dto.ChangeConsultationStatusDTO;
+import br.com.meusintoma.modules.consultation.dto.ConsultationByDoctorPatientDTO;
 import br.com.meusintoma.modules.consultation.dto.ConsultationCanceledResponseDTO;
 import br.com.meusintoma.modules.consultation.dto.ConsultationResponseDTO;
 import br.com.meusintoma.modules.consultation.dto.CreateConsultationDTO;
 import br.com.meusintoma.modules.consultation.dto.RescheduleConsultationDTO;
 import br.com.meusintoma.modules.consultation.exceptions.AlreadyHaveConsultationException;
+import br.com.meusintoma.modules.consultation.services.ConsultationRelationshipService;
 import br.com.meusintoma.modules.consultation.services.ConsultationService;
 import br.com.meusintoma.modules.patient.exceptions.PatientNotFoundException;
 
@@ -37,6 +39,9 @@ public class ConsultationController {
 
     @Autowired
     private ConsultationService consultationService;
+
+    @Autowired
+    private ConsultationRelationshipService consultationRelationshipService;
 
     @PostMapping
     @PreAuthorize("hasRole('PATIENT')")
@@ -51,10 +56,9 @@ public class ConsultationController {
             throw e;
         } catch (PatientNotFoundException e) {
             throw e;
-        }catch(AlreadyHaveConsultationException e){
+        } catch (AlreadyHaveConsultationException e) {
             throw e;
-        } 
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Algo deu errado ao criar as consultas");
         }
     }
@@ -72,10 +76,26 @@ public class ConsultationController {
         }
     }
 
-    @PatchMapping("/{consultationId}")
-    public ResponseEntity<Object> changeConsultationStatus(@PathVariable UUID consultationId, @RequestBody ChangeConsultationStatusDTO statusDTO){
+    @GetMapping("/doctor/{doctorId}/patient/{patientId}")
+    @PreAuthorize("hasRole('PATIENT') || hasRole('DOCTOR')")
+    public ResponseEntity<Object> getConsultationByDoctorAndPatient(@PathVariable UUID doctorId,
+            @PathVariable UUID patientId) {
         try {
-            ConsultationResponseDTO updated = consultationService.changeConsultationStatus(consultationId, statusDTO.getStatus());
+            List<ConsultationByDoctorPatientDTO> consultations = consultationRelationshipService.getConsultationsByDoctorAndPatient(doctorId, patientId);
+            return ResponseEntity.ok().body(consultations);
+        } catch (NoContentException e) {
+            throw e;
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Algo deu errado ao exibir as consultas");
+        }
+    }
+
+    @PatchMapping("/{consultationId}")
+    public ResponseEntity<Object> changeConsultationStatus(@PathVariable UUID consultationId,
+            @RequestBody ChangeConsultationStatusDTO statusDTO) {
+        try {
+            ConsultationResponseDTO updated = consultationService.changeConsultationStatus(consultationId,
+                    statusDTO.getStatus());
             return ResponseEntity.ok().body(updated);
         } catch (NotFoundException | CustomAccessDeniedException e) {
             throw e;

@@ -21,4 +21,10 @@ public class DoctorService {
                 () -> new NotFoundException("Paciente"));
         return doctor;
     }
+
+    public UUID findSecretaryIdByDoctorId(UUID doctorId) {
+        UUID secretaryId = RepositoryUtils.findOrThrow(doctorRepository.findSecretaryByDoctorId(doctorId),
+                () -> new NotFoundException("Paciente"));
+        return secretaryId;
+    }
 }

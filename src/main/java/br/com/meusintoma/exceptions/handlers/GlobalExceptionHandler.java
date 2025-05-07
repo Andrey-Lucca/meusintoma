@@ -11,6 +11,7 @@ import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
 import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
 import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
+import br.com.meusintoma.exceptions.globalCustomException.ForbiddenException;
 
 
 @ControllerAdvice
@@ -59,5 +60,14 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 "Não foi possível alterar este item, verifique sua condição");
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> forbiddenException(ForbiddenException ex) {
+        ErrorResponse error = new ErrorResponse(
+                "FORBIDDEN",
+                ex.getMessage(),
+                "Você não pode realizar esta ação");
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
 }

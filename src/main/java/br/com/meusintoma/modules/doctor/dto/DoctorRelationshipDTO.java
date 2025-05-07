@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DoctorRelationshipDTO {
     private UUID relationshipId;
+    private UUID patientId;
+    private UUID doctorId;
     private String patientName;
     private LocalDateTime associatedDate;
 }

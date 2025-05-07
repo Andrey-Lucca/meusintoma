@@ -53,11 +53,17 @@ public class ConsultationService {
         @Autowired
         ConsultationUtilsService consultationUtilsService;
 
-        private ConsultationEntity findConsultation(UUID consultationId) {
+        public ConsultationEntity findConsultation(UUID consultationId) {
                 ConsultationEntity consultation = RepositoryUtils.findOrThrow(
                                 consultationRepository.findById(consultationId),
                                 () -> new NotFoundException("Consulta"));
                 return consultation;
+        }
+
+        public ConsultationEntity findConsultationWithCalendar(UUID id) {
+                return RepositoryUtils.findOrThrow(
+                                consultationRepository.findWithCalendarSlotById(id),
+                                () -> new NotFoundException("Consulta"));
         }
 
         public ConsultationResponseDTO createConsultation(UUID calendarId) {

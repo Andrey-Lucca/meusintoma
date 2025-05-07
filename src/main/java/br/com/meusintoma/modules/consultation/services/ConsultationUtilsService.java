@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
+import br.com.meusintoma.exceptions.globalCustomException.ForbiddenException;
 import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
@@ -78,6 +79,12 @@ public class ConsultationUtilsService {
     public void checkConsultationStatus(ConsultationEntity consultation) {
         if (!statuses.contains(consultation.getStatus())) {
             throw new UnalterableException("Consulta");
+        }
+    }
+
+    public void checkConsultationStatusForNotes(ConsultationEntity consultation, List<ConsultationStatus> consultationStatus){
+        if(!consultationStatus.contains(consultation.getStatus())){
+            throw new ForbiddenException("Não é possível inserir notas nessa consulta");
         }
     }
 
