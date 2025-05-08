@@ -16,6 +16,7 @@ import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedExce
 import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.doctorPatient.dto.ChangeInviteStatusDTO;
 import br.com.meusintoma.modules.doctorPatient.dto.DoctorPatientInviteDTO;
+import br.com.meusintoma.modules.doctorPatient.exceptions.DoctorPatientDuplicatedInviteException;
 import br.com.meusintoma.modules.doctorPatient.exceptions.DoctorPatientNotValidStatusException;
 import br.com.meusintoma.modules.doctorPatient.services.DoctorPatientInvitationService;
 
@@ -27,12 +28,14 @@ public class DoctorPatientInvitationController {
     DoctorPatientInvitationService doctorPatientInvitationService;
 
     @PostMapping("/{patientId}")
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     public ResponseEntity<Object> invitePatient(@PathVariable UUID patientId) {
         try {
             DoctorPatientInviteDTO createdInvite = doctorPatientInvitationService.invitePatient(patientId);
             return ResponseEntity.status(201).body(createdInvite);
         } catch (NotFoundException e) {
+            throw e;
+        }catch (DoctorPatientDuplicatedInviteException e) {
             throw e;
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Something goes wrong on create the invite");
@@ -58,7 +61,7 @@ public class DoctorPatientInvitationController {
     }
 
     @PatchMapping("/{inviteId}/doctor-status")
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     public ResponseEntity<Object> disassociateByDoctor(@PathVariable UUID inviteId,
             @RequestBody ChangeInviteStatusDTO statusDTO) {
         try {

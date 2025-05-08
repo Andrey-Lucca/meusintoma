@@ -70,4 +70,5 @@ public class GlobalExceptionHandler {
                 "Você não pode realizar esta ação");
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
+    
 }

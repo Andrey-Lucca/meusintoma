@@ -22,6 +22,15 @@ public class DoctorPatientService {
     @Autowired
     DoctorService doctorService;
 
+    public DoctorPatientEntity getByIdValidated(UUID relationshipId) {
+        DoctorPatientEntity relationship = RepositoryUtils.findOrThrow(
+            doctorPatientRepository.findWithDoctorAndPatientById(relationshipId),
+            () -> new NotFoundException("Relação")
+        );
+        
+        return relationship;
+    }
+
     public DoctorPatientEntity getDoctorPatientRelationship(UUID relationshipId, UUID doctorId, UUID patientId) {
         String role = AuthValidatorUtils.getCurrentUserRole();
 

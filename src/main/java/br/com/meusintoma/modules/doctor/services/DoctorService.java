@@ -18,13 +18,19 @@ public class DoctorService {
 
     public DoctorEntity findDoctor(UUID doctorId) {
         DoctorEntity doctor = RepositoryUtils.findOrThrow(doctorRepository.findById(doctorId),
-                () -> new NotFoundException("Paciente"));
+                () -> new NotFoundException("Doutor"));
         return doctor;
     }
 
     public UUID findSecretaryIdByDoctorId(UUID doctorId) {
         UUID secretaryId = RepositoryUtils.findOrThrow(doctorRepository.findSecretaryByDoctorId(doctorId),
-                () -> new NotFoundException("Paciente"));
+                () -> new NotFoundException("Secretária"));
         return secretaryId;
+    }
+
+    public UUID getDoctorIdBySecretaryId(UUID secretaryId) {
+        UUID secretary = RepositoryUtils.findOrThrow(doctorRepository.findDoctorIdBySecretaryId(secretaryId),
+                () -> new NotFoundException("Secretaria"));
+        return secretary;
     }
 }

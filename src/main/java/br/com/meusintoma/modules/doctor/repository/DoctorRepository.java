@@ -12,4 +12,7 @@ import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 public interface DoctorRepository extends JpaRepository<DoctorEntity, UUID> {
     @Query("SELECT d.secretary FROM doctor d WHERE d.id = :doctorId")
     Optional<UUID> findSecretaryByDoctorId(@Param("doctorId") UUID doctorId);
+
+    @Query("SELECT d.id FROM doctor d WHERE d.secretary.id = :secretaryId")
+    Optional<UUID> findDoctorIdBySecretaryId(@Param("secretaryId") UUID secretaryId);
 }

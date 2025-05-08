@@ -13,6 +13,7 @@ import br.com.meusintoma.modules.doctorPatient.dto.ChangeInviteStatusDTO;
 import br.com.meusintoma.modules.doctorPatient.dto.DoctorPatientInviteDTO;
 import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientEntity;
 import br.com.meusintoma.modules.doctorPatient.enums.DoctorPatientStatus;
+import br.com.meusintoma.modules.doctorPatient.exceptions.DoctorPatientDuplicatedInviteException;
 import br.com.meusintoma.modules.doctorPatient.repository.DoctorPatientRepository;
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.modules.patient.services.PatientService;
@@ -37,9 +38,20 @@ public class DoctorPatientInvitationService {
                 () -> new NotFoundException("Relação Doutor Paciente"));
     }
 
+    private void checkRelationshipExistis(UUID doctorId, UUID patientId){
+        boolean isRelationshipExists = doctorPatientRepository.existsActiveDoctorPatientRelationship(doctorId, patientId);
+        if(isRelationshipExists){
+            throw new DoctorPatientDuplicatedInviteException("Já existe um convite associado a esse médico e paciente, por favor aguarde");
+        }
+    }
+
     public DoctorPatientInviteDTO invitePatient(UUID patientId) {
         PatientEntity patient = patientService.findPatient(patientId);
-        DoctorEntity doctor = doctorService.findDoctor(AuthValidatorUtils.getAuthenticatedUserId());
+        String role = AuthValidatorUtils.getCurrentUserRole();
+        UUID userId = AuthValidatorUtils.getAuthenticatedUserId();
+        UUID doctorId = "SECRETARY".equals(role) ? doctorService.getDoctorIdBySecretaryId(userId) : userId;
+        DoctorEntity doctor = doctorService.findDoctor(doctorId);
+        checkRelationshipExistis(doctorId, patientId);
 
         DoctorPatientEntity doctorPatient = DoctorPatientEntity.builder().doctor(doctor).patient(patient)
                 .status(DoctorPatientStatus.PENDING).build();
@@ -60,7 +72,9 @@ public class DoctorPatientInvitationService {
     }
 
     public DoctorPatientInviteDTO disassociateByDoctor(UUID inviteId, ChangeInviteStatusDTO changeStatusDTO) {
-        UUID doctorId = AuthValidatorUtils.getAuthenticatedUserId();
+        String role = AuthValidatorUtils.getCurrentUserRole();
+        UUID userId = AuthValidatorUtils.getAuthenticatedUserId();
+        UUID doctorId = "SECRETARY".equals(role) ? doctorService.getDoctorIdBySecretaryId(userId) : userId;
         DoctorPatientEntity doctorPatientRelationship = findDoctorPatientEntity(inviteId);
         GenericUtils.compareId(doctorPatientRelationship.getDoctor().getId(), doctorId);
         DoctorPatientUtilsService.checkDoctorStatus(changeStatusDTO.getStatus());
