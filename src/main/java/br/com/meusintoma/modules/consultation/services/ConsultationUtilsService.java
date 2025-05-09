@@ -82,8 +82,9 @@ public class ConsultationUtilsService {
         }
     }
 
-    public void checkConsultationStatusForNotes(ConsultationEntity consultation, List<ConsultationStatus> consultationStatus){
-        if(!consultationStatus.contains(consultation.getStatus())){
+    public void checkConsultationStatusForNotes(ConsultationEntity consultation,
+            List<ConsultationStatus> consultationStatus) {
+        if (!consultationStatus.contains(consultation.getStatus())) {
             throw new ForbiddenException("Não é possível inserir notas nessa consulta");
         }
     }
@@ -138,5 +139,10 @@ public class ConsultationUtilsService {
         if (exists) {
             throw new AlreadyHaveConsultationException("Consulta já marcada com esse médico");
         }
+    }
+
+    public void consultationSecurityCheck(ConsultationEntity consultation, List<ConsultationStatus> statuses) {
+        validateUserPermission(consultation);
+        checkConsultationStatusForNotes(consultation, statuses);
     }
 }

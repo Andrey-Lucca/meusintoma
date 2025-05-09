@@ -12,12 +12,16 @@ import br.com.meusintoma.modules.doctor.services.DoctorService;
 import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientEntity;
 import br.com.meusintoma.modules.doctorPatient.enums.DoctorPatientStatus;
 import br.com.meusintoma.modules.doctorPatient.exceptions.DoctorPatientNotValidStatusException;
+import br.com.meusintoma.security.utils.AuthValidatorUtils;
 
 @Service
 public class DoctorPatientUtilsService {
 
     @Autowired
     DoctorService doctorService;
+
+    @Autowired
+    DoctorPatientService doctorPatientService;
 
     public static void checkPatientStatus(DoctorPatientStatus status) {
         List<DoctorPatientStatus> statuses = new ArrayList<>(
@@ -54,5 +58,11 @@ public class DoctorPatientUtilsService {
         }
 
         return allowedIds;
+    }
+
+    public void validateAcess(DoctorPatientEntity relationship) {
+        UUID targetUserId = AuthValidatorUtils.getAuthenticatedUserId();
+        List<UUID> allowedIds = createPermissionList(relationship);
+        checkUserPermission(allowedIds, targetUserId);
     }
 }

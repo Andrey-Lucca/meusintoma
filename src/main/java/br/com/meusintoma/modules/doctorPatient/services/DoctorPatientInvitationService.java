@@ -5,7 +5,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import br.com.meusintoma.modules.doctor.services.DoctorService;
 import br.com.meusintoma.modules.doctorPatient.Mapper.DoctorPatientMapper;
@@ -18,8 +17,6 @@ import br.com.meusintoma.modules.doctorPatient.repository.DoctorPatientRepositor
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.modules.patient.services.PatientService;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
-import br.com.meusintoma.utils.GenericUtils;
-import br.com.meusintoma.utils.RepositoryUtils;
 
 @Service
 public class DoctorPatientInvitationService {
@@ -33,15 +30,22 @@ public class DoctorPatientInvitationService {
     @Autowired
     DoctorPatientRepository doctorPatientRepository;
 
-    public DoctorPatientEntity findDoctorPatientEntity(UUID inviteId) {
-        return RepositoryUtils.findOrThrow(doctorPatientRepository.findById(inviteId),
-                () -> new NotFoundException("Relação Doutor Paciente"));
+    @Autowired
+    DoctorPatientService doctorPatientService;
+
+    @Autowired
+    DoctorPatientUtilsService doctorPatientUtilsService;
+
+    public DoctorPatientEntity findDoctorPatientEntity(UUID inviteRelationshipId) {
+        return doctorPatientService.getByIdValidated(inviteRelationshipId);
     }
 
-    private void checkRelationshipExistis(UUID doctorId, UUID patientId){
-        boolean isRelationshipExists = doctorPatientRepository.existsActiveDoctorPatientRelationship(doctorId, patientId);
-        if(isRelationshipExists){
-            throw new DoctorPatientDuplicatedInviteException("Já existe um convite associado a esse médico e paciente, por favor aguarde");
+    private void checkRelationshipExistis(UUID doctorId, UUID patientId) {
+        boolean isRelationshipExists = doctorPatientRepository.existsActiveDoctorPatientRelationship(doctorId,
+                patientId);
+        if (isRelationshipExists) {
+            throw new DoctorPatientDuplicatedInviteException(
+                    "Já existe um convite associado a esse médico e paciente, por favor aguarde");
         }
     }
 
@@ -60,27 +64,23 @@ public class DoctorPatientInvitationService {
         return doctorPatientInviteDTO;
     }
 
-    public DoctorPatientInviteDTO changeStatus(UUID inviteId, ChangeInviteStatusDTO changeStatusDTO) {
-        UUID patientId = AuthValidatorUtils.getAuthenticatedUserId();
-        DoctorPatientEntity doctorPatientInvite = findDoctorPatientEntity(inviteId);
-        GenericUtils.compareId(doctorPatientInvite.getPatient().getId(), patientId);
+    public DoctorPatientInviteDTO changeStatus(UUID relationshipInviteId, ChangeInviteStatusDTO changeStatusDTO) {
+        DoctorPatientEntity relationship = doctorPatientService.getByIdValidated(relationshipInviteId);
+        doctorPatientUtilsService.validateAcess(relationship);
         DoctorPatientUtilsService.checkPatientStatus(changeStatusDTO.getStatus());
-        doctorPatientInvite.setStatus(changeStatusDTO.getStatus());
-        doctorPatientRepository.save(doctorPatientInvite);
-        DoctorPatientInviteDTO doctorPatientInviteDTO = DoctorPatientMapper.createInviteDTO(doctorPatientInvite);
+        relationship.setStatus(changeStatusDTO.getStatus());
+        doctorPatientRepository.save(relationship);
+        DoctorPatientInviteDTO doctorPatientInviteDTO = DoctorPatientMapper.createInviteDTO(relationship);
         return doctorPatientInviteDTO;
     }
 
-    public DoctorPatientInviteDTO disassociateByDoctor(UUID inviteId, ChangeInviteStatusDTO changeStatusDTO) {
-        String role = AuthValidatorUtils.getCurrentUserRole();
-        UUID userId = AuthValidatorUtils.getAuthenticatedUserId();
-        UUID doctorId = "SECRETARY".equals(role) ? doctorService.getDoctorIdBySecretaryId(userId) : userId;
-        DoctorPatientEntity doctorPatientRelationship = findDoctorPatientEntity(inviteId);
-        GenericUtils.compareId(doctorPatientRelationship.getDoctor().getId(), doctorId);
+    public DoctorPatientInviteDTO disassociateByDoctor(UUID relationshipInviteId, ChangeInviteStatusDTO changeStatusDTO) {
+        DoctorPatientEntity relationship = doctorPatientService.getByIdValidated(relationshipInviteId);
+        doctorPatientUtilsService.validateAcess(relationship);
         DoctorPatientUtilsService.checkDoctorStatus(changeStatusDTO.getStatus());
-        doctorPatientRelationship.setStatus(changeStatusDTO.getStatus());
-        doctorPatientRepository.save(doctorPatientRelationship);
-        DoctorPatientInviteDTO doctorPatientInviteDTO = DoctorPatientMapper.createInviteDTO(doctorPatientRelationship);
+        relationship.setStatus(changeStatusDTO.getStatus());
+        doctorPatientRepository.save(relationship);
+        DoctorPatientInviteDTO doctorPatientInviteDTO = DoctorPatientMapper.createInviteDTO(relationship);
         return doctorPatientInviteDTO;
     }
 }
