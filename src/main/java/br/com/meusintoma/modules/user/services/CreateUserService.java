@@ -1,5 +1,8 @@
 package br.com.meusintoma.modules.user.services;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,13 @@ public class CreateUserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    public Point createPoint(double latitude, double longitude) {
+    GeometryFactory geometryFactory = new GeometryFactory();
+    Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
+    point.setSRID(4326);
+    return point;
+}
+
     public UserEntity execute(CreateUserDTO userDTO) {
         if (userDTO == null) {
             throw new IllegalArgumentException("The fields cannot be null");
@@ -44,6 +54,9 @@ public class CreateUserService {
         var password = passwordEncoder.encode(userDTO.getPassword());
         userDTO.setPassword(password);
         UserEntity userEntity = UserMapper.toEntity(userDTO);
+        Point location = createPoint(userDTO.getLatitude(), userDTO.getLongitude());
+        System.out.println("Location ->" + location);
+        userEntity.setLocation(location);
         var userType = userEntity.getUserType();
         switch (userType) {
             case DOCTOR:

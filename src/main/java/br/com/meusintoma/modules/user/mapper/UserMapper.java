@@ -1,9 +1,13 @@
 package br.com.meusintoma.modules.user.mapper;
 
+import org.locationtech.jts.geom.Point;
+
 import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.modules.secretary.entity.SecretaryEntity;
 import br.com.meusintoma.modules.user.dto.CreateUserDTO;
+import br.com.meusintoma.modules.user.dto.LocationDTO;
+import br.com.meusintoma.modules.user.dto.UserResponseDTO;
 import br.com.meusintoma.modules.user.entity.UserEntity;
 
 public class UserMapper {
@@ -62,5 +66,23 @@ public class UserMapper {
                 .userType(createUserDTO.getUserType())
                 .phoneNumber(createUserDTO.getPhoneNumber())
                 .build();
+    }
+
+    public static UserResponseDTO toResponseDTO(UserEntity user) {
+        if (user == null)
+            return null;
+
+        LocationDTO locationDTO = null;
+        Point location = user.getLocation();
+        if (location != null) {
+            locationDTO = new LocationDTO(location.getY(), location.getX());
+        }
+
+        UserResponseDTO response = new UserResponseDTO();
+        response.setName(user.getName());
+        response.setEmail(user.getEmail());
+        response.setUserType(user.getUserType());
+        response.setLocation(locationDTO);
+        return response;
     }
 }

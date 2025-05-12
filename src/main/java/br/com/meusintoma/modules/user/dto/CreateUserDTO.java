@@ -1,5 +1,7 @@
 package br.com.meusintoma.modules.user.dto;
 
+
+
 import br.com.meusintoma.modules.user.entity.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +17,8 @@ public class CreateUserDTO {
     private String email;
     private String password;
     private UserType userType;
-
+    private Double latitude;
+    private Double longitude;
     private String crm;            
     private String specialization; 
     private String phoneNumber;
