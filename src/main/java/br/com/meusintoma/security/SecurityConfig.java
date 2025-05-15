@@ -23,6 +23,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/user/create").permitAll();
                     auth.requestMatchers("/user/auth").permitAll();
+                    auth.requestMatchers("/email/**").permitAll();
                     auth.anyRequest().authenticated();
                 }).addFilterBefore(securityUserFilter, BasicAuthenticationFilter.class);
         return http.build();

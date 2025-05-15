@@ -1,14 +1,19 @@
 package br.com.meusintoma.modules.user.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.locationtech.jts.geom.Point;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import br.com.meusintoma.modules.email.entity.EmailConfirmationTokenEntity;
+
 import org.hibernate.annotations.CreationTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -18,7 +23,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -45,6 +52,14 @@ public class UserEntity {
 
     @Enumerated(EnumType.STRING)
     private UserType userType;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<EmailConfirmationTokenEntity> emailConfirmationTokens = new ArrayList<>();
+
+    @Column(nullable = true)
+    @Builder.Default
+    private boolean enabled = false;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

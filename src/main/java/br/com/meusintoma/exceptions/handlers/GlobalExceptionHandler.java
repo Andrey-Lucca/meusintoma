@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import br.com.meusintoma.exceptions.globalCustomException.BadRequestException;
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
 import br.com.meusintoma.exceptions.globalCustomException.ErrorResponse;
 import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
@@ -12,7 +13,6 @@ import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
 import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
 import br.com.meusintoma.exceptions.globalCustomException.ForbiddenException;
-
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponse> notFound(NotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException ex) {
         ErrorResponse error = new ErrorResponse(
                 "ITEM_NOT_FOUND",
                 ex.getMessage(),
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnalterableException.class)
-    public ResponseEntity<ErrorResponse> unalterableException(UnalterableException ex) {
+    public ResponseEntity<ErrorResponse> handleUnalterableException(UnalterableException ex) {
         ErrorResponse error = new ErrorResponse(
                 "ITEM_NOT_ALTERABLE",
                 ex.getMessage(),
@@ -63,12 +63,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ErrorResponse> forbiddenException(ForbiddenException ex) {
+    public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException ex) {
         ErrorResponse error = new ErrorResponse(
                 "FORBIDDEN",
                 ex.getMessage(),
                 "Você não pode realizar esta ação");
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
-    
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
+        ErrorResponse error = new ErrorResponse(
+                "BAD_REQUEST",
+                ex.getMessage(),
+                "Algo deu errado com sua requisição, por favor verifique");
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
 }

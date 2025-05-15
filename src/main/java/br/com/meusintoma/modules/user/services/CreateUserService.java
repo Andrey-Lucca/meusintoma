@@ -1,23 +1,23 @@
 package br.com.meusintoma.modules.user.services;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import br.com.meusintoma.exceptions.globalCustomException.UserFoundException;
 import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import br.com.meusintoma.modules.doctor.repository.DoctorRepository;
+import br.com.meusintoma.modules.email.services.EmailService;
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.modules.patient.repository.PatientRepository;
 import br.com.meusintoma.modules.secretary.entity.SecretaryEntity;
 import br.com.meusintoma.modules.secretary.repository.SecretaryRepository;
 import br.com.meusintoma.modules.user.dto.CreateUserDTO;
 import br.com.meusintoma.modules.user.entity.UserEntity;
+import br.com.meusintoma.modules.user.exceptions.UserAlreadyRegistered;
 import br.com.meusintoma.modules.user.mapper.UserMapper;
 import br.com.meusintoma.modules.user.repository.UserRepository;
+import br.com.meusintoma.utils.GeoUtils;
+import jakarta.transaction.Transactional;
 
 @Service
 public class CreateUserService {
@@ -37,37 +37,32 @@ public class CreateUserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public Point createPoint(double latitude, double longitude) {
-    GeometryFactory geometryFactory = new GeometryFactory();
-    Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
-    point.setSRID(4326);
-    return point;
-}
+    @Autowired
+    private EmailService emailService;
 
+    @Transactional
     public UserEntity execute(CreateUserDTO userDTO) {
-        if (userDTO == null) {
-            throw new IllegalArgumentException("The fields cannot be null");
-        }
-        this.userRepository.findByEmail(userDTO.getEmail()).ifPresent((user) -> {
-            throw new UserFoundException();
-        });
-        var password = passwordEncoder.encode(userDTO.getPassword());
-        userDTO.setPassword(password);
-        UserEntity userEntity = UserMapper.toEntity(userDTO);
-        Point location = createPoint(userDTO.getLatitude(), userDTO.getLongitude());
-        System.out.println("Location ->" + location);
-        userEntity.setLocation(location);
-        var userType = userEntity.getUserType();
-        switch (userType) {
-            case DOCTOR:
-                return doctorRepository.save((DoctorEntity) userEntity);
-            case PATIENT:
-                return patientRepository.save((PatientEntity) userEntity);
-            case SECRETARY:
-                return secretaryRepository.save((SecretaryEntity) userEntity);
-            default:
-                throw new IllegalArgumentException("Invalid user type: " + userType);
-        }
+        validateEmail(userDTO.getEmail());
+
+        userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        UserEntity user = UserMapper.toEntity(userDTO);
+        user.setLocation(GeoUtils.createPoint(userDTO.getLatitude(), userDTO.getLongitude()));
+        emailService.generateAndSendConfirmation(user);
+        return saveUserByType(user);
     }
 
+    private void validateEmail(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            throw new UserAlreadyRegistered("Email: " + email + " já cadastrado");
+        });
+    }
+
+    private UserEntity saveUserByType(UserEntity user) {
+        return switch (user.getUserType()) {
+            case DOCTOR -> doctorRepository.save((DoctorEntity) user);
+            case PATIENT -> patientRepository.save((PatientEntity) user);
+            case SECRETARY -> secretaryRepository.save((SecretaryEntity) user);
+            default -> throw new IllegalArgumentException("Invalid user type: " + user.getUserType());
+        };
+    }
 }

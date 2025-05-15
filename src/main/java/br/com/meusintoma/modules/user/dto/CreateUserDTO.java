@@ -2,6 +2,7 @@ package br.com.meusintoma.modules.user.dto;
 
 
 
+import br.com.meusintoma.modules.doctor.enums.DoctorSpecialization;
 import br.com.meusintoma.modules.user.entity.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,6 @@ public class CreateUserDTO {
     private Double latitude;
     private Double longitude;
     private String crm;            
-    private String specialization; 
+    private DoctorSpecialization specialization; 
     private String phoneNumber;
 }

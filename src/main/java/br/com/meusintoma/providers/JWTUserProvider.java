@@ -19,7 +19,7 @@ public class JWTUserProvider {
             var decodedToken = JWT.require(algorithm).build().verify(token);
             return decodedToken;
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return null;
         }
     }

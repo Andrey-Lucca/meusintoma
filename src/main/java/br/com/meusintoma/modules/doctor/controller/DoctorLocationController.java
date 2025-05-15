@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
 import br.com.meusintoma.modules.doctor.dto.DoctorResponseDTO;
 import br.com.meusintoma.modules.doctor.services.DoctorLocationService;
 import br.com.meusintoma.modules.user.dto.UserNearbyLocationDTO;
@@ -23,8 +24,11 @@ public class DoctorLocationController {
     @GetMapping("/nearby")
     public ResponseEntity<Object> getNearbyDoctors(@RequestBody UserNearbyLocationDTO userRequest) {
         try {
-            List<DoctorResponseDTO> doctors = doctorLocationService.getNearbyDoctors(userRequest.getLocation(), userRequest.getDistance(), userRequest.getDoctorSpecialization());
+            List<DoctorResponseDTO> doctors = doctorLocationService.getNearbyDoctors(userRequest.getLocation(),
+                    userRequest.getDistance(), userRequest.getDoctorSpecialization());
             return ResponseEntity.ok().body(doctors);
+        } catch (NoContentException e) {
+            return ResponseEntity.internalServerError().body("Failed to get doctor locations");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body("Failed to get doctor locations");
