@@ -22,7 +22,7 @@ import br.com.meusintoma.modules.consultation.enums.ConsultationStatus;
 import br.com.meusintoma.modules.consultation.exceptions.AlreadyHaveConsultationException;
 import br.com.meusintoma.modules.consultation.repository.ConsultationRepository;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
-import br.com.meusintoma.utils.SystemClockUtils;
+import br.com.meusintoma.utils.helpers.SystemClockUtils;
 
 @Service
 public class ConsultationUtilsService {

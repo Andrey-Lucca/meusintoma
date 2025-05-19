@@ -1,6 +1,6 @@
 package br.com.meusintoma.modules.symptonEvent.dto;
 
-import br.com.meusintoma.modules.symptonEvent.enums.Severity;
+import br.com.meusintoma.utils.common.Severity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

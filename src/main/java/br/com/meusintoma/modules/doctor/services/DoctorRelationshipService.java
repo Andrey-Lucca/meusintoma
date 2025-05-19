@@ -11,7 +11,7 @@ import br.com.meusintoma.modules.doctor.mapper.DoctorRelationshipMapper;
 import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientEntity;
 import br.com.meusintoma.modules.doctorPatient.repository.DoctorPatientRepository;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
-import br.com.meusintoma.utils.GenericUtils;
+import br.com.meusintoma.utils.helpers.GenericUtils;
 
 @Service
 public class DoctorRelationshipService {

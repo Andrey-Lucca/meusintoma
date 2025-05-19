@@ -1,5 +1,7 @@
 package br.com.meusintoma.modules.consultation.services;
 
+import static br.com.meusintoma.utils.helpers.RepositoryUtils.findOrThrow;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -30,10 +32,8 @@ import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.modules.patient.exceptions.PatientNotFoundException;
 import br.com.meusintoma.modules.patient.repository.PatientRepository;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
-import br.com.meusintoma.utils.RepositoryUtils;
-import br.com.meusintoma.utils.SystemClockUtils;
-
-import static br.com.meusintoma.utils.RepositoryUtils.findOrThrow;
+import br.com.meusintoma.utils.helpers.RepositoryUtils;
+import br.com.meusintoma.utils.helpers.SystemClockUtils;
 
 @Service
 public class ConsultationService {

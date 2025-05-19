@@ -8,8 +8,7 @@ import org.springframework.stereotype.Service;
 import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientEntity;
 import br.com.meusintoma.modules.doctorPatient.repository.DoctorPatientRepository;
-
-import br.com.meusintoma.utils.RepositoryUtils;
+import br.com.meusintoma.utils.helpers.RepositoryUtils;
 
 @Service
 public class DoctorPatientService {

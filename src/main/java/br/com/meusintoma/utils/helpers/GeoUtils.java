@@ -1,4 +1,4 @@
-package br.com.meusintoma.utils;
+package br.com.meusintoma.utils.helpers;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;

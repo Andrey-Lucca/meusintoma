@@ -1,4 +1,4 @@
-package br.com.meusintoma.modules.symptonEvent.enums;
+package br.com.meusintoma.utils.common;
 
 public enum Severity {
     HIGH,

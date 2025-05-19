@@ -1,4 +1,4 @@
-package br.com.meusintoma.utils;
+package br.com.meusintoma.utils.helpers;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;

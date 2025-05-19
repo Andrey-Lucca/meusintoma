@@ -8,7 +8,7 @@ import br.com.meusintoma.exceptions.globalCustomException.ForbiddenException;
 import br.com.meusintoma.modules.email.dto.EmailResponseDTO;
 import br.com.meusintoma.modules.email.entity.EmailConfirmationTokenEntity;
 import br.com.meusintoma.modules.user.entity.UserEntity;
-import br.com.meusintoma.utils.SystemClockUtils;
+import br.com.meusintoma.utils.helpers.SystemClockUtils;
 
 @Service
 public class EmailUtilsService {

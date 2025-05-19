@@ -1,8 +1,9 @@
 package br.com.meusintoma.modules.user.dto;
 
-
+import java.util.Set;
 
 import br.com.meusintoma.modules.doctor.enums.DoctorSpecialization;
+import br.com.meusintoma.modules.patient.enums.HealthPlans;
 import br.com.meusintoma.modules.user.entity.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +21,8 @@ public class CreateUserDTO {
     private UserType userType;
     private Double latitude;
     private Double longitude;
-    private String crm;            
-    private DoctorSpecialization specialization; 
+    private String crm;
+    private DoctorSpecialization specialization;
     private String phoneNumber;
+    private Set<HealthPlans> healthPlans;
 }

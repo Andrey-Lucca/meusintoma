@@ -21,7 +21,7 @@ import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientEntity;
 import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientNoteEntity;
 import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientNoteItemEntity;
 import br.com.meusintoma.modules.doctorPatient.repository.DoctorPatientNoteRepository;
-import br.com.meusintoma.utils.RepositoryUtils;
+import br.com.meusintoma.utils.helpers.RepositoryUtils;
 
 @Service
 public class DoctorPatientNotesService {

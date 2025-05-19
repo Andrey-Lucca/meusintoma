@@ -1,10 +1,6 @@
-package br.com.meusintoma.modules.symptonEvent.entity;
+package br.com.meusintoma.modules.chronicdisease.entity;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.utils.common.Severity;
@@ -21,27 +17,29 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "sympton")
+@Entity(name = "chronicDisease")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SymptonEventEntity {
+public class ChronicDiseaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    private String symptonName;
-
-    @CreationTimestamp
-    private LocalDateTime startedAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id", nullable = false)
-    private PatientEntity patient;
+    @JoinColumn(name = "disease_type_id")
+    private DiseaseTypeEntity diseaseType;
+
+    private int yearsQuantity;
 
     @Enumerated(EnumType.STRING)
+
     private Severity severity;
+
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private PatientEntity patient;
+
 }

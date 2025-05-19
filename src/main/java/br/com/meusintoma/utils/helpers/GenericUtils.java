@@ -1,4 +1,4 @@
-package br.com.meusintoma.utils;
+package br.com.meusintoma.utils.helpers;
 
 import java.util.List;
 import java.util.UUID;

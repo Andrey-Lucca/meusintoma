@@ -16,7 +16,7 @@ import br.com.meusintoma.modules.user.entity.UserEntity;
 import br.com.meusintoma.modules.user.exceptions.UserAlreadyRegistered;
 import br.com.meusintoma.modules.user.mapper.UserMapper;
 import br.com.meusintoma.modules.user.repository.UserRepository;
-import br.com.meusintoma.utils.GeoUtils;
+import br.com.meusintoma.utils.helpers.GeoUtils;
 import jakarta.transaction.Transactional;
 
 @Service

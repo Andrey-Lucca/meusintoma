@@ -12,7 +12,7 @@ import br.com.meusintoma.modules.consultation.entity.ConsultationEntity;
 import br.com.meusintoma.modules.consultation.enums.ConsultationStatus;
 import br.com.meusintoma.modules.consultation.mapper.ConsultationMapper;
 import br.com.meusintoma.modules.consultation.repository.ConsultationRepository;
-import br.com.meusintoma.utils.GenericUtils;
+import br.com.meusintoma.utils.helpers.GenericUtils;
 
 @Service
 public class ConsultationRelationshipService {

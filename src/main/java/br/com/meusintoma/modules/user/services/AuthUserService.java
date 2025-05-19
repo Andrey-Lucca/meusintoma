@@ -14,10 +14,13 @@ import org.springframework.stereotype.Service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
-import br.com.meusintoma.exceptions.globalCustomException.UserNotFoundException;
+import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
 import br.com.meusintoma.modules.user.dto.AuthUserRequestDTO;
 import br.com.meusintoma.modules.user.dto.AuthUserResponseDTO;
+import br.com.meusintoma.modules.user.entity.UserEntity;
+import br.com.meusintoma.modules.user.exceptions.UserAuthException;
 import br.com.meusintoma.modules.user.repository.UserRepository;
+import br.com.meusintoma.utils.helpers.RepositoryUtils;
 
 @Service
 public class AuthUserService {
@@ -30,22 +33,36 @@ public class AuthUserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public AuthUserResponseDTO execute(AuthUserRequestDTO userRequestDTO) throws AuthenticationException {
-        var user = userRepository.findByEmail(userRequestDTO.getEmail()).orElseThrow(() -> {
-            throw new UserNotFoundException();
-        });
-
-        var passwordMatches = passwordEncoder.matches(userRequestDTO.getPassword(), user.getPassword());
-        if (!passwordMatches) {
-            throw new AuthenticationException();
+    private void checkConfirmationEmail(UserEntity user) {
+        if (!user.isEnabled()) {
+            throw new CustomAccessDeniedException("O seu e-mail deve ser confirmado primeiro");
         }
+    }
+
+    private void checkPassword(AuthUserRequestDTO userRequestDTO, UserEntity user) {
+        boolean passwordMatches = passwordEncoder.matches(userRequestDTO.getPassword(), user.getPassword());
+        if (!passwordMatches) {
+            throw new UserAuthException();
+        }
+    }
+
+    private AuthUserResponseDTO generateUserResponse(UserEntity user) {
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
         var expires_in = Instant.now().plus(Duration.ofDays(30));
         var token = JWT.create().withIssuer("meusintoma").withExpiresAt(expires_in)
                 .withSubject(user.getId().toString()).withClaim("roles", Arrays.asList(user.getUserType().toString()))
                 .sign(algorithm);
-        AuthUserResponseDTO authUserResponseDTO = AuthUserResponseDTO.builder().acess_token(token)
-                .expires_in(expires_in.toEpochMilli()).build();
+        return AuthUserResponseDTO.builder().acess_token(token).expires_in(expires_in.toEpochMilli()).build();
+    }
+
+    public AuthUserResponseDTO execute(AuthUserRequestDTO userRequestDTO) throws AuthenticationException {
+        UserEntity user = RepositoryUtils.findOrThrow(userRepository.findByEmail(userRequestDTO.getEmail()),
+                () -> new UserAuthException());
+
+        checkPassword(userRequestDTO, user);
+        checkConfirmationEmail(user);
+        AuthUserResponseDTO authUserResponseDTO = generateUserResponse(user);
+
         return authUserResponseDTO;
     }
 }

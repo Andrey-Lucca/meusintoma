@@ -14,8 +14,8 @@ import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import br.com.meusintoma.modules.doctor.mapper.DoctorMapper;
 import br.com.meusintoma.modules.doctor.repository.DoctorRepository;
 import br.com.meusintoma.modules.user.dto.LocationDTO;
-import br.com.meusintoma.utils.GeoUtils;
-import br.com.meusintoma.utils.RepositoryUtils;
+import br.com.meusintoma.utils.helpers.GeoUtils;
+import br.com.meusintoma.utils.helpers.RepositoryUtils;
 
 @Service
 public class DoctorLocationService {

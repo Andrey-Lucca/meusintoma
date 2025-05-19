@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
 import br.com.meusintoma.modules.user.dto.AuthUserRequestDTO;
+import br.com.meusintoma.modules.user.exceptions.UserAuthException;
 import br.com.meusintoma.modules.user.services.AuthUserService;
 
 @RestController
@@ -23,8 +25,11 @@ public class AuthUserController {
         try {
             var result = this.authUserService.execute(authUserRequestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(result);
+        } catch (UserAuthException e) {
+            throw e;
+        } catch (CustomAccessDeniedException e) {
+            throw e;
         } catch (Exception e) {
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }

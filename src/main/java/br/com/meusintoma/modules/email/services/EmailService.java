@@ -15,9 +15,9 @@ import br.com.meusintoma.modules.email.entity.EmailConfirmationTokenEntity;
 import br.com.meusintoma.modules.email.exception.TokenGenerationException;
 import br.com.meusintoma.modules.email.repository.EmailConfirmationRepository;
 import br.com.meusintoma.modules.user.entity.UserEntity;
-import br.com.meusintoma.utils.CryptoUtils;
-import br.com.meusintoma.utils.RepositoryUtils;
-import br.com.meusintoma.utils.SystemClockUtils;
+import br.com.meusintoma.utils.helpers.CryptoUtils;
+import br.com.meusintoma.utils.helpers.RepositoryUtils;
+import br.com.meusintoma.utils.helpers.SystemClockUtils;
 import jakarta.transaction.Transactional;
 
 @Service
