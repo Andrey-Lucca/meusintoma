@@ -36,7 +36,7 @@ public interface CalendarRepository extends JpaRepository<CalendarEntity, UUID> 
     Optional<CalendarEntity> findByDayAndHour(@Param("date") LocalDate date, @Param("hour") LocalTime hour,
             @Param("doctorId") UUID doctorId);
 
-    @Query("SELECT c FROM calendar c WHERE c.date IN (:startDate, :finalDate) AND c.doctor.id = :doctorId")
+    @Query("SELECT c FROM calendar c WHERE c.date BETWEEN :startDate AND :finalDate AND c.doctor.id = :doctorId")
     Optional<List<CalendarEntity>> findBySpecificalInterval(@Param("startDate") LocalDate startDate,
             @Param("finalDate") LocalDate finalDate, @Param("doctorId") UUID doctorId);
 }

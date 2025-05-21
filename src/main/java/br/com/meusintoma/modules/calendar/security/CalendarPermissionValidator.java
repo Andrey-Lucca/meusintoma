@@ -40,7 +40,7 @@ public class CalendarPermissionValidator {
     public void validateCalendarDatePermission(LocalDate requestDateDTO){
         LocalDate currentDate = LocalDate.now();
         if(requestDateDTO.isBefore(currentDate)){
-            throw new InvalidDateException();
+            throw new InvalidDateException("A data fornecida tem que ser igual ou maior do que a data atual");
         }
     }
 

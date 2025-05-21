@@ -2,6 +2,8 @@ package br.com.meusintoma.modules.calendar.services;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -9,13 +11,14 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
 import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.calendar.dto.CalendarConsultationResponseDTO;
 import br.com.meusintoma.modules.calendar.dto.CalendarResponseDTO;
 import br.com.meusintoma.modules.calendar.dto.CalendarConsultationRequestDTO;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
-import br.com.meusintoma.modules.calendar.exceptions.CalendarInvalidDateException;
+import br.com.meusintoma.modules.calendar.enums.IntervalChoice;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarStatusException;
 import br.com.meusintoma.modules.calendar.exceptions.NoDoctorCalendarException;
@@ -53,8 +56,7 @@ public class CalendarService {
 
     public List<CalendarConsultationResponseDTO> getCalendarConsultation(CalendarConsultationRequestDTO requestDTO) {
         UUID doctorId = requestDTO.getDoctorId();
-        LocalDate startDate = requestDTO.getStartDate();
-
+        LocalDate startDate = getStartDate(requestDTO.getIntervalChoice(), requestDTO.getStartDate());
         checkCalendarPermissions(doctorId, startDate);
 
         return switch (requestDTO.getIntervalChoice()) {
@@ -63,8 +65,14 @@ public class CalendarService {
                 yield List.of(item);
             }
             case INTERVAL -> getCalendarBySpecificalInterval(doctorId, startDate, requestDTO.getFinalDate());
-            case DAILY -> getCalendarBySpecificalInterval(doctorId, startDate, startDate.plusDays(1));
-            case WEEKLY -> getCalendarBySpecificalInterval(doctorId, startDate, startDate.plusDays(7));
+            case DAILY -> getCalendarBySpecificalInterval(doctorId, startDate, startDate);
+            case WEEKLY ->
+                getCalendarBySpecificalInterval(doctorId, startDate, startDate.plusDays(7)).stream().filter(c -> {
+                    if(c.getDate().equals(startDate)){
+                        return !c.getStartTime().isBefore(SystemClockUtils.getCurrentTime());
+                    }
+                    return !c.getDate().isBefore(startDate);
+                }).sorted(Comparator.comparing(CalendarConsultationResponseDTO::getDate)).toList();
             default -> throw new IllegalArgumentException("Tipo de intervalo inválido.");
         };
     }
@@ -105,9 +113,14 @@ public class CalendarService {
         }
     }
 
+    private LocalDate getStartDate(IntervalChoice choice, LocalDate startDate) {
+        List<IntervalChoice> automaticSystemDateChoices = new ArrayList<>(
+                List.of(IntervalChoice.DAILY, IntervalChoice.WEEKLY));
+        return automaticSystemDateChoices.contains(choice) ? SystemClockUtils.getCurrentDate() : startDate;
+    }
+
     private CalendarConsultationResponseDTO getCalendarBySpecificalDayAndHour(
             CalendarConsultationRequestDTO requestDTO) {
-        checkCalendarPermissions(requestDTO.getDoctorId(), requestDTO.getStartDate());
         CalendarEntity calendar = RepositoryUtils.findOrThrow(
                 calendarRepository.findByDayAndHour(requestDTO.getStartDate(), requestDTO.getStartTime(),
                         requestDTO.getDoctorId()),
@@ -118,7 +131,6 @@ public class CalendarService {
     private List<CalendarConsultationResponseDTO> getCalendarBySpecificalInterval(
             UUID doctorId, LocalDate startDate, LocalDate finalDate) {
         checkEndDate(startDate, finalDate);
-        checkCalendarPermissions(doctorId, startDate);
 
         List<CalendarEntity> calendars = RepositoryUtils.findOrThrow(
                 calendarRepository.findBySpecificalInterval(startDate, finalDate, doctorId),
@@ -130,9 +142,9 @@ public class CalendarService {
     }
 
     private void checkEndDate(LocalDate startDate, LocalDate endDate) {
-        boolean isEndDateBiggerThanStartDate = endDate.isAfter(startDate);
+        boolean isEndDateBiggerThanStartDate = endDate.isBefore(startDate);
         if (isEndDateBiggerThanStartDate) {
-            throw new CalendarInvalidDateException("A data final não pode ser maior do que a data inicial, confira");
+            throw new InvalidDateException("Data final maior que a inicial");
         }
     }
 

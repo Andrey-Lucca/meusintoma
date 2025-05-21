@@ -1,5 +1,6 @@
 package br.com.meusintoma.modules.calendar.controller;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,6 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
 import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
+import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
+import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
+import br.com.meusintoma.modules.calendar.dto.CalendarConsultationRequestDTO;
+import br.com.meusintoma.modules.calendar.dto.CalendarConsultationResponseDTO;
 import br.com.meusintoma.modules.calendar.dto.UpdateCalendarDTO;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.NoDoctorCalendarException;
@@ -42,6 +47,28 @@ public class CalendarController {
         } catch (NoDoctorCalendarException e) {
             throw e;
         } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Houve uma exceção ao tentar visualizar o calendário do doutor!");
+        }
+    }
+
+    @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
+    @GetMapping("/calendar-consult")
+    public ResponseEntity<Object> getCalendarConsult(
+            @RequestBody CalendarConsultationRequestDTO calendarConsultationRequestDTO) {
+        try {
+            List<CalendarConsultationResponseDTO> calendars = calendarService
+                    .getCalendarConsultation( calendarConsultationRequestDTO);
+            return ResponseEntity.ok().body(calendars);
+        } catch (NotFoundException e) {
+            throw e;
+        } catch (NoContentException e) {
+            throw e;
+        } catch (CustomAccessDeniedException e) {
+            throw e;
+        } catch (InvalidDateException e) {
+            throw e;
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Houve uma exceção ao tentar visualizar o calendário do doutor!");
         }
     }

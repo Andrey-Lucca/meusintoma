@@ -2,7 +2,6 @@ package br.com.meusintoma.modules.calendar.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.UUID;
 
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.doctor.enums.DoctorSpecialization;
@@ -16,7 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CalendarResponseDTO {
-    private UUID id;
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;

@@ -2,6 +2,7 @@ package br.com.meusintoma.exceptions.handlers;
 
 import br.com.meusintoma.modules.calendar.exceptions.NoDoctorCalendarException;
 import br.com.meusintoma.exceptions.globalCustomException.ErrorResponse;
+import br.com.meusintoma.modules.calendar.exceptions.CalendarInvalidDateException;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarStatusException;
@@ -46,6 +47,15 @@ public class CalendarExceptionHandler {
                 "UNALTERABLE_CALENDAR",
                 ex.getMessage(),
                 "Alterações bloqueadas");
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(CalendarInvalidDateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidDate(CalendarInvalidDateException ex) {
+        ErrorResponse error = new ErrorResponse(
+                "INVALID_DATE",
+                ex.getMessage(),
+                "Data inválida");
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 }
