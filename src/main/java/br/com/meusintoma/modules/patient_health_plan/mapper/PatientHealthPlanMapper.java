@@ -7,7 +7,7 @@ public class PatientHealthPlanMapper {
 
     public static PatientHealthPlanResponseDTO toPatientHealthPlanResponse(PatientHealthPlanEntity patientHealthPlan) {
         return PatientHealthPlanResponseDTO.builder().cardIdentification(patientHealthPlan.getCardIdentification())
-                .patientName(patientHealthPlan.getPatient().getName())
+                .id(patientHealthPlan.getId())
                 .planName(patientHealthPlan.getHealthPlan().getName()).build();
     }
 }

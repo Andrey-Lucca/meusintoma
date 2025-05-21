@@ -1,6 +1,7 @@
 package br.com.meusintoma.modules.calendar.repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,4 +31,12 @@ public interface CalendarRepository extends JpaRepository<CalendarEntity, UUID> 
                 WHERE c.id = :calendarId
             """)
     Optional<CalendarEntity> findByIdWithDoctorAndSecretary(@Param("calendarId") UUID calendarId);
+
+    @Query("SELECT c FROM calendar c WHERE c.date = :date AND c.startTime = :hour AND c.doctor.id = :doctorId")
+    Optional<CalendarEntity> findByDayAndHour(@Param("date") LocalDate date, @Param("hour") LocalTime hour,
+            @Param("doctorId") UUID doctorId);
+
+    @Query("SELECT c FROM calendar c WHERE c.date IN (:startDate, :finalDate) AND c.doctor.id = :doctorId")
+    Optional<List<CalendarEntity>> findBySpecificalInterval(@Param("startDate") LocalDate startDate,
+            @Param("finalDate") LocalDate finalDate, @Param("doctorId") UUID doctorId);
 }

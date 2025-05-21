@@ -2,6 +2,7 @@ package br.com.meusintoma.modules.calendar.mapper;
 
 import java.time.LocalDate;
 
+import br.com.meusintoma.modules.calendar.dto.CalendarConsultationResponseDTO;
 import br.com.meusintoma.modules.calendar.dto.CalendarResponseDTO;
 import br.com.meusintoma.modules.calendar.dto.CalendarWeeklySlotsGenerationDTO;
 import br.com.meusintoma.modules.calendar.dto.GenerateDailySlotsRequestDTO;
@@ -56,5 +57,10 @@ public class CalendarMapperDTO {
                 .doctorName(calendarEntity.getDoctor().getName())
                 .doctorSpecialization(calendarEntity.getDoctor().getSpecialization()).build();
         return calendarResponseDTO;
+    }
+
+    public static CalendarConsultationResponseDTO toCalendarConsultationResponse(CalendarEntity calendar) {
+        return CalendarConsultationResponseDTO.builder().date(calendar.getDate()).endTime(calendar.getEndTime())
+                .startTime(calendar.getStartTime()).id(calendar.getId()).status(calendar.getCalendarStatus()).build();
     }
 }
