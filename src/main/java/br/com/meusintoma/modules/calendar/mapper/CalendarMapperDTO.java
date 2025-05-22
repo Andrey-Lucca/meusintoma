@@ -60,7 +60,10 @@ public class CalendarMapperDTO {
     }
 
     public static CalendarConsultationResponseDTO toCalendarConsultationResponse(CalendarEntity calendar) {
-        return CalendarConsultationResponseDTO.builder().date(calendar.getDate()).endTime(calendar.getEndTime())
-                .startTime(calendar.getStartTime()).id(calendar.getId()).status(calendar.getCalendarStatus()).build();
+        return CalendarConsultationResponseDTO.builder().date(calendar.getDate())
+                .endTime(calendar.getEndTime())
+                .startTime(calendar.getStartTime()).id(calendar.getId())
+                .status(calendar.getCalendarStatus())
+                .doctorId(calendar.getDoctor().getId()).build();
     }
 }

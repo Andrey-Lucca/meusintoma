@@ -44,6 +44,12 @@ public class CalendarService {
         }
     }
 
+    public CalendarEntity findByCalendarIdWithDoctorAndSecretary(UUID calendarId) {
+        return RepositoryUtils.findOrThrow(
+                calendarRepository.findByIdWithDoctorAndSecretary(calendarId),
+                () -> new CalendarNotFoundException("Horário Indisponível"));
+    }
+
     public List<CalendarResponseDTO> getDoctorCalendar(UUID doctorId) {
         final LocalDate currentDate = SystemClockUtils.getCurrentDate();
         final LocalTime currentTime = SystemClockUtils.getCurrentTime();
@@ -68,7 +74,7 @@ public class CalendarService {
             case DAILY -> getCalendarBySpecificalInterval(doctorId, startDate, startDate);
             case WEEKLY ->
                 getCalendarBySpecificalInterval(doctorId, startDate, startDate.plusDays(7)).stream().filter(c -> {
-                    if(c.getDate().equals(startDate)){
+                    if (c.getDate().equals(startDate)) {
                         return !c.getStartTime().isBefore(SystemClockUtils.getCurrentTime());
                     }
                     return !c.getDate().isBefore(startDate);
@@ -148,7 +154,7 @@ public class CalendarService {
         }
     }
 
-    private void checkCalendarPermissions(UUID doctorId, LocalDate startDate) {
+    public void checkCalendarPermissions(UUID doctorId, LocalDate startDate) {
         calendarPermissionService.validatePermissionCalendar(doctorId, Optional.of(startDate));
     }
 

@@ -1,4 +1,4 @@
-package br.com.meusintoma.modules.calendar.dto;
+package br.com.meusintoma.modules.doctor.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -14,11 +14,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CalendarConsultationResponseDTO {
-    private UUID id;
+public class DoctorCalendarResponseDTO {
     private LocalDate date;
-    private LocalTime startTime;
-    private LocalTime endTime;
-    private CalendarStatus status;
-    private UUID doctorId;
+    private LocalTime startAt;
+    private LocalTime endAt;
+    private CalendarStatus calendarStatus;
+    private UUID calendarId;
 }

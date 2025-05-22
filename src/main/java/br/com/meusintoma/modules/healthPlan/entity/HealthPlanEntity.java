@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import br.com.meusintoma.modules.calendarHealthPlan.entity.CalendarHealthPlanEntity;
 import br.com.meusintoma.modules.patient_health_plan.entity.PatientHealthPlanEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -22,7 +23,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HealthPlanEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -32,4 +33,8 @@ public class HealthPlanEntity {
     @OneToMany(mappedBy = "healthPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<PatientHealthPlanEntity> patientAssociations = new HashSet<>();
+
+    @OneToMany(mappedBy = "healthPlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<CalendarHealthPlanEntity> linkedCalendars  = new HashSet<>();
 }

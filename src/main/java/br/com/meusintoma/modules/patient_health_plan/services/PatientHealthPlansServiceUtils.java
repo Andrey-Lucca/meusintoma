@@ -6,7 +6,7 @@ import br.com.meusintoma.modules.healthPlan.entity.HealthPlanEntity;
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.modules.patient_health_plan.dto.PatientHealthPlanAssociationResultDTO;
 import br.com.meusintoma.modules.patient_health_plan.entity.PatientHealthPlanEntity;
-import br.com.meusintoma.modules.patient_health_plan.enums.PatientPlanAssociationStatusResult;
+import br.com.meusintoma.utils.common.AssociationStatusResult;
 
 public class PatientHealthPlansServiceUtils {
     public static PatientHealthPlanEntity buildPatientHealthPlanEntity(PatientEntity patient,
@@ -17,7 +17,7 @@ public class PatientHealthPlansServiceUtils {
     }
 
     public static PatientHealthPlanAssociationResultDTO buildResult(String planName,
-            PatientPlanAssociationStatusResult status, String message) {
+            AssociationStatusResult status, String message) {
         return PatientHealthPlanAssociationResultDTO.builder()
                 .healthPlanName(planName)
                 .status(status)
@@ -26,7 +26,7 @@ public class PatientHealthPlansServiceUtils {
     }
 
     public static void addResult(List<PatientHealthPlanAssociationResultDTO> results, HealthPlanEntity plan,
-            PatientPlanAssociationStatusResult status, String message) {
+            AssociationStatusResult status, String message) {
         results.add(buildResult(
                 plan.getName(),
                 status,

@@ -17,10 +17,10 @@ import br.com.meusintoma.modules.patient_health_plan.dto.PatientHealthPlanAssoci
 import br.com.meusintoma.modules.patient_health_plan.dto.PatientHealthPlanRequestDTO;
 import br.com.meusintoma.modules.patient_health_plan.dto.PatientHealthPlanResponseDTO;
 import br.com.meusintoma.modules.patient_health_plan.entity.PatientHealthPlanEntity;
-import br.com.meusintoma.modules.patient_health_plan.enums.PatientPlanAssociationStatusResult;
 import br.com.meusintoma.modules.patient_health_plan.mapper.PatientHealthPlanMapper;
 import br.com.meusintoma.modules.patient_health_plan.repository.PatientHealthPlanRepository;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
+import br.com.meusintoma.utils.common.AssociationStatusResult;
 import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
 
@@ -53,18 +53,18 @@ public class PatientHealthPlanService {
                 boolean alreadyExists = patientHealthPlanRepository.existsByPatientAndHealthPlan(patient, plan);
                 if (alreadyExists) {
                     PatientHealthPlansServiceUtils.addResult(results, plan,
-                            PatientPlanAssociationStatusResult.ALREADY_EXISTS,
+                            AssociationStatusResult.ALREADY_EXISTS,
                             "Plan already associated");
                     continue;
                 }
                 PatientHealthPlanEntity association = PatientHealthPlansServiceUtils
                         .buildPatientHealthPlanEntity(patient, plan, cardId);
                 newAssociations.add(association);
-                PatientHealthPlansServiceUtils.addResult(results, plan, PatientPlanAssociationStatusResult.ASSOCIATED,
+                PatientHealthPlansServiceUtils.addResult(results, plan, AssociationStatusResult.ASSOCIATED,
                         "Patient Associated");
             } catch (Exception e) {
                 results.add(
-                        PatientHealthPlansServiceUtils.buildResult(planName, PatientPlanAssociationStatusResult.ERROR,
+                        PatientHealthPlansServiceUtils.buildResult(planName, AssociationStatusResult.ERROR,
                                 "Error associating plan: " + e.getMessage()));
             }
         }
@@ -75,30 +75,45 @@ public class PatientHealthPlanService {
     }
 
     public List<PatientHealthPlanResponseDTO> getPatientHealthPlans(UUID requestPatientId) {
-        UUID patientId = AuthValidatorUtils.getAuthenticatedUserId();
-        GenericUtils.compareId(requestPatientId, patientId);
+        checkPatient(requestPatientId);
 
         List<PatientHealthPlanEntity> associations = RepositoryUtils.findOrThrow(
-                patientHealthPlanRepository.getAllPlansByPatientId(patientId),
+                patientHealthPlanRepository.getAllPlansByPatientId(requestPatientId),
                 () -> new NotFoundException("Paciente-Plano"));
 
-        GenericUtils.checkIsEmptyList(associations);
+        // GenericUtils.checkIsEmptyList(associations);
 
         return associations.stream().map(PatientHealthPlanMapper::toPatientHealthPlanResponse).toList();
     }
 
-    public PatientHealthPlanResponseDTO disassociate(UUID patientHealthPlanId) {
-        UUID patientId = AuthValidatorUtils.getAuthenticatedUserId();
+    public List<String> getOnlyHealthPlans(UUID requestPatientId) {
+        checkPatient(requestPatientId);
 
+        List<String> healthPlans = patientHealthPlanRepository.getAllPlansNameByPatientId(requestPatientId);
+
+        if (healthPlans.isEmpty()) {
+            throw new NotFoundException("Paciente-Plano");
+        }
+        return healthPlans;
+
+    }
+
+    public PatientHealthPlanResponseDTO disassociate(UUID patientHealthPlanId) {
         PatientHealthPlanEntity association = RepositoryUtils.findOrThrow(
                 patientHealthPlanRepository.findById(patientHealthPlanId),
                 () -> new NotFoundException("Paciente-Plano"));
 
-        GenericUtils.compareId(association.getPatient().getId(), patientId);
+        checkPatient(association.getPatient().getId());
 
         patientHealthPlanRepository.delete(association);
 
         return PatientHealthPlanMapper.toPatientHealthPlanResponse(association);
+    }
+
+    private void checkPatient(UUID requestPatientId) {
+        UUID patientId = AuthValidatorUtils.getAuthenticatedUserId();
+        GenericUtils.compareId(requestPatientId, patientId);
+
     }
 
     private void saveNewAssociations(List<PatientHealthPlanEntity> newAssociations) {

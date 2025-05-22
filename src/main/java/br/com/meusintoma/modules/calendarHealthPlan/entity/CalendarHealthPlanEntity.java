@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CalendarHealthPlan {
+public class CalendarHealthPlanEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
