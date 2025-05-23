@@ -48,7 +48,7 @@ public class ConsultationController {
     public ResponseEntity<Object> createConsultation(@RequestBody CreateConsultationDTO consultationDto) {
         try {
             ConsultationResponseDTO consultation = consultationService
-                    .createConsultation(consultationDto.getCalendarId());
+                    .createConsultation(consultationDto.getCalendarId(), consultationDto.getHealthPlan());
             return ResponseEntity.status(201).body(consultation);
         } catch (UnavaliableTimeException e) {
             throw e;
@@ -81,7 +81,8 @@ public class ConsultationController {
     public ResponseEntity<Object> getConsultationByDoctorAndPatient(@PathVariable UUID doctorId,
             @PathVariable UUID patientId) {
         try {
-            List<ConsultationByDoctorPatientDTO> consultations = consultationRelationshipService.getConsultationsByDoctorAndPatient(doctorId, patientId);
+            List<ConsultationByDoctorPatientDTO> consultations = consultationRelationshipService
+                    .getConsultationsByDoctorAndPatient(doctorId, patientId);
             return ResponseEntity.ok().body(consultations);
         } catch (NoContentException e) {
             throw e;

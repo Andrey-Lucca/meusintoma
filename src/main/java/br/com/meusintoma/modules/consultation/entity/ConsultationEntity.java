@@ -40,6 +40,8 @@ public class ConsultationEntity {
     @Column(columnDefinition = "uuid")
     private UUID id;
 
+    private String healthPlan;
+
     @Enumerated(EnumType.STRING)
     private ConsultationStatus status;
 

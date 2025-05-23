@@ -22,6 +22,7 @@ import br.com.meusintoma.modules.healthPlan.entity.HealthPlanEntity;
 import br.com.meusintoma.modules.healthPlan.services.HealthPlanService;
 import br.com.meusintoma.utils.common.AssociationStatusResult;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
+import jakarta.transaction.Transactional;
 
 @Service
 public class CalendarHealthPlanService {
@@ -96,6 +97,20 @@ public class CalendarHealthPlanService {
     public List<CalendarHealthPlanEntity> getAllCalendarsWithHealthPlansByDoctor(UUID doctorId) {
         return RepositoryUtils.findOrThrow(calendarHealthPlanRepository.getAllAvaliableCalendarsByDoctorId(doctorId),
                 () -> new NotFoundException("Calendário - Plano"));
+    }
+
+    public List<CalendarHealthPlanEntity> getCalendarHealthPlan(UUID doctorId, UUID calendarId){
+        return RepositoryUtils.findOrThrow(calendarHealthPlanRepository.getCalendarByIdAndDoctor(doctorId, calendarId),
+                () -> new NotFoundException("Calendário - Plano"));
+    }
+
+    @Transactional
+    public void deleteCalendarHealthPlan(UUID doctorId, UUID calendarId, UUID calendarHealthPlanId){
+        CalendarEntity calendar = calendarService.findByCalendarIdWithDoctorAndSecretary(calendarId);
+        calendarService.checkCalendarPermissions(doctorId, calendar.getDate());
+        RepositoryUtils.findOrThrow(calendarHealthPlanRepository.findById(calendarHealthPlanId),
+                () -> new NotFoundException("Calendário - Plano"));
+        calendarHealthPlanRepository.deleteById(calendarHealthPlanId);
     }
 
 }

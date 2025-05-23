@@ -38,6 +38,7 @@ public class ConsultationMapper {
                                 .doctor(doctorName)
                                 .patient(consultation.getPatient().getName())
                                 .status(consultation.getStatus())
+                                .healthPlanName(consultation.getHealthPlan())
                                 .build();
 
                 return responseDTO;

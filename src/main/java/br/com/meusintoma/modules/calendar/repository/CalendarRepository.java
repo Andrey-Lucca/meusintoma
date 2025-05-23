@@ -17,28 +17,38 @@ import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 
 public interface CalendarRepository extends JpaRepository<CalendarEntity, UUID> {
 
-    boolean existsByDoctorId(UUID doctorId);
+        boolean existsByDoctorId(UUID doctorId);
 
-    @EntityGraph(attributePaths = {"doctor"})
-    List<CalendarEntity> findAllByDoctorId(UUID doctorId);
+        @EntityGraph(attributePaths = { "doctor" })
+        List<CalendarEntity> findAllByDoctorId(UUID doctorId);
 
-    @Modifying
-    @Query("DELETE FROM calendar c WHERE c.date < :date AND c.calendarStatus IN :statuses")
-    void deleteOldCalendarsByStatus(@Param("date") LocalDate date, @Param("statuses") List<CalendarStatus> statuses);
+        @Modifying
+        @Query("DELETE FROM calendar c WHERE c.date < :date AND c.calendarStatus IN :statuses")
+        void deleteOldCalendarsByStatus(@Param("date") LocalDate date,
+                        @Param("statuses") List<CalendarStatus> statuses);
 
-    @Query("""
-                SELECT c FROM calendar c
-                JOIN FETCH c.doctor d
-                LEFT JOIN FETCH d.secretary
-                WHERE c.id = :calendarId
-            """)
-    Optional<CalendarEntity> findByIdWithDoctorAndSecretary(@Param("calendarId") UUID calendarId);
+        @Query("""
+                            SELECT c FROM calendar c
+                            JOIN FETCH c.doctor d
+                            LEFT JOIN FETCH d.secretary
+                            WHERE c.id = :calendarId
+                        """)
+        Optional<CalendarEntity> findByIdWithDoctorAndSecretary(@Param("calendarId") UUID calendarId);
 
-    @Query("SELECT c FROM calendar c WHERE c.date = :date AND c.startTime = :hour AND c.doctor.id = :doctorId")
-    Optional<CalendarEntity> findByDayAndHour(@Param("date") LocalDate date, @Param("hour") LocalTime hour,
-            @Param("doctorId") UUID doctorId);
+        @Query("""
+                        SELECT DISTINCT c FROM calendar c
+                        JOIN FETCH c.doctor d
+                        LEFT JOIN FETCH d.secretary
+                        JOIN FETCH c.linkedHealthPlans lhp
+                        WHERE c.id = :calendarId
+                              """)
+        Optional<CalendarEntity> findByIdWithDoctorAndSecretaryAndHealthPlan(@Param("calendarId") UUID calendarId);
 
-    @Query("SELECT c FROM calendar c WHERE c.date BETWEEN :startDate AND :finalDate AND c.doctor.id = :doctorId")
-    Optional<List<CalendarEntity>> findBySpecificalInterval(@Param("startDate") LocalDate startDate,
-            @Param("finalDate") LocalDate finalDate, @Param("doctorId") UUID doctorId);
+        @Query("SELECT c FROM calendar c WHERE c.date = :date AND c.startTime = :hour AND c.doctor.id = :doctorId")
+        Optional<CalendarEntity> findByDayAndHour(@Param("date") LocalDate date, @Param("hour") LocalTime hour,
+                        @Param("doctorId") UUID doctorId);
+
+        @Query("SELECT c FROM calendar c WHERE c.date BETWEEN :startDate AND :finalDate AND c.doctor.id = :doctorId")
+        Optional<List<CalendarEntity>> findBySpecificalInterval(@Param("startDate") LocalDate startDate,
+                        @Param("finalDate") LocalDate finalDate, @Param("doctorId") UUID doctorId);
 }

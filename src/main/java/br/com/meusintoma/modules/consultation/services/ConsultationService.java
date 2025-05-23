@@ -18,8 +18,11 @@ import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
+import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
 import br.com.meusintoma.modules.calendar.repository.CalendarRepository;
 import br.com.meusintoma.modules.calendar.services.CalendarService;
+import br.com.meusintoma.modules.calendarHealthPlan.entity.CalendarHealthPlanEntity;
+import br.com.meusintoma.modules.calendarHealthPlan.repository.CalendarHealthPlanRepository;
 import br.com.meusintoma.modules.consultation.dto.ConsultationCanceledResponseDTO;
 import br.com.meusintoma.modules.consultation.dto.ConsultationResponseDTO;
 import br.com.meusintoma.modules.consultation.dto.RescheduleConsultationDTO;
@@ -29,8 +32,8 @@ import br.com.meusintoma.modules.consultation.enums.ConsultationStatus;
 import br.com.meusintoma.modules.consultation.mapper.ConsultationMapper;
 import br.com.meusintoma.modules.consultation.repository.ConsultationRepository;
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
-import br.com.meusintoma.modules.patient.exceptions.PatientNotFoundException;
 import br.com.meusintoma.modules.patient.repository.PatientRepository;
+import br.com.meusintoma.modules.patient.services.PatientService;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
 import br.com.meusintoma.utils.helpers.SystemClockUtils;
@@ -48,10 +51,16 @@ public class ConsultationService {
         PatientRepository patientRepository;
 
         @Autowired
+        PatientService patientService;
+
+        @Autowired
         CalendarService calendarService;
 
         @Autowired
         ConsultationUtilsService consultationUtilsService;
+
+        @Autowired
+        CalendarHealthPlanRepository calendarHealthPlanRepository;
 
         public ConsultationEntity findConsultation(UUID consultationId) {
                 ConsultationEntity consultation = RepositoryUtils.findOrThrow(
@@ -66,20 +75,22 @@ public class ConsultationService {
                                 () -> new NotFoundException("Consulta"));
         }
 
-        public ConsultationResponseDTO createConsultation(UUID calendarId) {
+        public ConsultationResponseDTO createConsultation(UUID calendarId, String healthPlan) {
                 UUID patientId = AuthValidatorUtils.getAuthenticatedUserId();
                 CalendarEntity calendar = findOrThrow(
                                 calendarRepository.findByIdWithDoctorAndSecretary(calendarId),
                                 () -> new CalendarNotFoundException("Horário Indisponível"));
+                List<CalendarHealthPlanEntity> linkedPlansList = calendarHealthPlanRepository
+                                .findLinkedHealthPlansByCalendarId(calendarId);
+
+                calendarHasHealthPlan(linkedPlansList, healthPlan);
 
                 boolean isDateAndHourWithInPeriod = consultationUtilsService.dateAndHourAvaliable(calendar.getDate(),
                                 calendar.getStartTime());
 
                 CalendarService.checkCalendarStatusAndHour(CalendarStatus.AVAILABLE, isDateAndHourWithInPeriod);
 
-                PatientEntity patient = findOrThrow(
-                                patientRepository.findById(patientId),
-                                () -> new PatientNotFoundException("Paciente inválido para essa operação"));
+                PatientEntity patient = patientService.findPatient(patientId);
 
                 SnapShotInfo snapshot = SnapShotInfo.builder()
                                 .date(null)
@@ -99,6 +110,7 @@ public class ConsultationService {
                                                 : null)
                                 .canceledBy(null)
                                 .snapshot(snapshot)
+                                .healthPlan(healthPlan)
                                 .build();
 
                 consultationRepository.save(consultation);
@@ -198,5 +210,12 @@ public class ConsultationService {
                 consultationUtilsService.changeCalendarStatus(consultation, CalendarStatus.AVAILABLE);
                 consultationUtilsService.cancelConsultation(consultation, snapshot);
                 return ConsultationMapper.toCanceledResponseDTO(consultation);
+        }
+
+        private void calendarHasHealthPlan(List<CalendarHealthPlanEntity> calendarHealthPlans, String healthPlan) {
+                boolean hasPlan = calendarHealthPlans.stream().anyMatch(chp -> chp.getHealthPlan().getName().equals(healthPlan));
+                if(!hasPlan){
+                        throw new UnavaliableTimeException("Esse plano não está disponível para esse horário");
+                }
         }
 }

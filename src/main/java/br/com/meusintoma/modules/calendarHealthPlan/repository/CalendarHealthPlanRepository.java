@@ -11,11 +11,28 @@ import org.springframework.data.repository.query.Param;
 import br.com.meusintoma.modules.calendarHealthPlan.entity.CalendarHealthPlanEntity;
 
 public interface CalendarHealthPlanRepository extends JpaRepository<CalendarHealthPlanEntity, UUID> {
-    @Query("SELECT COUNT(chp) > 0 FROM calendar_health_plan chp WHERE chp.calendar.id = :calendarId AND chp.healthPlan.name = :healthPlanName")
-    boolean existsByCalendarIdAndHealthPlanName(@Param("calendarId") UUID calendarId,
-            @Param("healthPlanName") String healthPlanName);
+        @Query("SELECT COUNT(chp) > 0 FROM calendar_health_plan chp WHERE chp.calendar.id = :calendarId AND chp.healthPlan.name = :healthPlanName")
+        boolean existsByCalendarIdAndHealthPlanName(@Param("calendarId") UUID calendarId,
+                        @Param("healthPlanName") String healthPlanName);
 
-    @Query("SELECT chp FROM calendar_health_plan chp JOIN FETCH calendar c JOIN FETCH c.doctor d JOIN FETCH healthPlan hp WHERE d.id = :doctorId AND c.calendarStatus = 'AVAILABLE'")
-    Optional<List<CalendarHealthPlanEntity>> getAllAvaliableCalendarsByDoctorId(@Param("doctorId") UUID doctorId);
+        @Query("SELECT chp FROM calendar_health_plan chp JOIN FETCH calendar c JOIN FETCH c.doctor d JOIN FETCH healthPlan hp WHERE d.id = :doctorId AND chp.calendar.id = :calendarId")
+        Optional<List<CalendarHealthPlanEntity>> getCalendarByIdAndDoctor(@Param("doctorId") UUID doctorId,
+                        @Param("calendarId") UUID calendarId);
+
+        @Query("SELECT chp FROM calendar_health_plan chp JOIN FETCH calendar c JOIN FETCH c.doctor d JOIN FETCH healthPlan hp WHERE d.id = :doctorId AND c.calendarStatus = 'AVAILABLE'")
+        Optional<List<CalendarHealthPlanEntity>> getAllAvaliableCalendarsByDoctorId(@Param("doctorId") UUID doctorId);
+
+        @Query("""
+                            SELECT chp FROM calendar_health_plan chp
+                            JOIN FETCH chp.healthPlan hp
+                            WHERE chp.calendar.id = :calendarId
+                        """)
+        List<CalendarHealthPlanEntity> findLinkedHealthPlansByCalendarId(@Param("calendarId") UUID calendarId);
+
+        // @Query("DELETE FROM calendar_health_plan chp WHERE chp.calendar.id =
+        // :calendarId AND chp.healthPlan.id = :healthPlanId")
+        // Optional<CalendarHealthPlanEntity>
+        // deleteByCalendarIdAndHealthPlanName(@Param("calendarId") UUID calendarId,
+        // @Param("healthPlanId") UUID healthPlanId);
 
 }

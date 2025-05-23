@@ -28,6 +28,12 @@ public class PatientService {
         return patient;
     }
 
+    public PatientEntity findPatientWithHealthPlans(UUID patientId){
+        PatientEntity patient = RepositoryUtils.findOrThrow(patientRepository.getPatientWithHealthPlan(patientId),
+                () -> new NotFoundException("Paciente"));
+        return patient;
+    }
+
     public void checkPatient(UUID targetPatientId){
         UUID patientId = AuthValidatorUtils.getAuthenticatedUserId();
         GenericUtils.compareId(targetPatientId, patientId);

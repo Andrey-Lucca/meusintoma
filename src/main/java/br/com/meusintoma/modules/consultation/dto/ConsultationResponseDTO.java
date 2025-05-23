@@ -18,4 +18,5 @@ public class ConsultationResponseDTO {
     private LocalTime startedAt;
     private LocalTime endAt;
     private LocalDate date;
+    private String healthPlanName;
 }

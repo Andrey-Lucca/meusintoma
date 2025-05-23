@@ -2,6 +2,7 @@ package br.com.meusintoma.modules.doctor.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Map;
 import java.util.UUID;
 
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
@@ -20,4 +21,8 @@ public class DoctorCalendarResponseDTO {
     private LocalTime endAt;
     private CalendarStatus calendarStatus;
     private UUID calendarId;
+
+    //Específico para consulta do calendario unitário
+    private Map<UUID,String> calendarHealthPlan;
+
 }
