@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
-import br.com.meusintoma.utils.common.AssociationStatusResult;
+import br.com.meusintoma.utils.common.StatusResult;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,5 +25,5 @@ public class CalendarHealthPlanResponseCreationDTO {
     private String healthPlanName;
     private CalendarStatus calendarStatus;
     private String message; 
-    private AssociationStatusResult associationStatusResult;
+    private StatusResult associationStatusResult;
 }

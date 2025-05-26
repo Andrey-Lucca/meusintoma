@@ -51,11 +51,20 @@ public class CalendarMapperDTO {
     }
 
     public static CalendarResponseDTO toResponseDTO(CalendarEntity calendarEntity) {
-        CalendarResponseDTO calendarResponseDTO = CalendarResponseDTO.builder().date(calendarEntity.getDate())
+        CalendarResponseDTO calendarResponseDTO = CalendarResponseDTO.builder()
+                .date(calendarEntity.getDate())
                 .startTime(calendarEntity.getStartTime()).endTime(calendarEntity.getEndTime())
                 .status(calendarEntity.getCalendarStatus())
-                .doctorName(calendarEntity.getDoctor().getName())
-                .doctorSpecialization(calendarEntity.getDoctor().getSpecialization()).build();
+                .build();
+        return calendarResponseDTO;
+    }
+
+    public static CalendarResponseDTO toResponseDTO() {
+        CalendarResponseDTO calendarResponseDTO = CalendarResponseDTO.builder()
+                .date(null)
+                .startTime(null).endTime(null)
+                .status(null)
+                .build();
         return calendarResponseDTO;
     }
 

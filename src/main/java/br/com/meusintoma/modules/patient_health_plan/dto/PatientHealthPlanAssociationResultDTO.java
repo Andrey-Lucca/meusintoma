@@ -1,6 +1,6 @@
 package br.com.meusintoma.modules.patient_health_plan.dto;
 
-import br.com.meusintoma.utils.common.AssociationStatusResult;
+import br.com.meusintoma.utils.common.StatusResult;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,6 +8,6 @@ import lombok.Data;
 @Builder
 public class PatientHealthPlanAssociationResultDTO {
     private String healthPlanName;
-    private AssociationStatusResult status;
+    private StatusResult status;
     private String message;
 }

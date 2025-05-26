@@ -38,6 +38,11 @@ public class CalendarService {
     @Autowired
     CalendarPermissionService calendarPermissionService;
 
+
+    public boolean doctorAlreadyHaveCalendarSlot(UUID doctorId, LocalDate targetDate, LocalTime startedAt) {
+        return calendarRepository.checkDoctorCalendarSlot(doctorId, targetDate, startedAt);
+    }
+
     public void verifyDoctorHasCalendar(UUID doctorId) {
         if (!calendarRepository.existsByDoctorId(doctorId)) {
             throw new NoDoctorCalendarException("Nenhum calendário encontrado para o médico");

@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
-import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
 import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
@@ -35,8 +34,8 @@ import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.modules.patient.repository.PatientRepository;
 import br.com.meusintoma.modules.patient.services.PatientService;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
+import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
-import br.com.meusintoma.utils.helpers.SystemClockUtils;
 
 @Service
 public class ConsultationService {
@@ -92,26 +91,14 @@ public class ConsultationService {
 
                 PatientEntity patient = patientService.findPatient(patientId);
 
-                SnapShotInfo snapshot = SnapShotInfo.builder()
-                                .date(null)
-                                .startTime(null)
-                                .endTime(null)
-                                .build();
+                SnapShotInfo snapshot = ConsultationUtilsService.createConsultationSnapshot();
 
                 List<ConsultationEntity> consultations = consultationRepository.findAllByPatientId(patientId);
 
-                consultationUtilsService.alredyHaveConsultation(consultations, calendar.getDoctor().getId());
+                consultationUtilsService.alreadyHaveConsultation(consultations, calendar.getDoctor().getId());
 
-                ConsultationEntity consultation = ConsultationEntity.builder().calendarSlot(calendar)
-                                .status(ConsultationStatus.PENDING).patient(patient)
-                                .doctorId(calendar.getDoctor().getId())
-                                .secretaryId(calendar.getDoctor().getSecretary() != null
-                                                ? calendar.getDoctor().getSecretary().getId()
-                                                : null)
-                                .canceledBy(null)
-                                .snapshot(snapshot)
-                                .healthPlan(healthPlan)
-                                .build();
+                ConsultationEntity consultation = ConsultationUtilsService.createConsultation(calendar, healthPlan,
+                                patient, snapshot);
 
                 consultationRepository.save(consultation);
                 consultationUtilsService.changeCalendarStatus(consultation, CalendarStatus.UNAVAILABLE);
@@ -137,43 +124,17 @@ public class ConsultationService {
                         default:
                                 throw new CustomAccessDeniedException("Você não tem permissões suficientes");
                 }
-                if (consultations.isEmpty()) {
-                        throw new NoContentException("Não existe nada para ser mostrado");
-                }
-                return consultations.stream()
-                                .filter(consultation -> {
-                                        LocalDate date;
-                                        LocalTime time;
 
-                                        if (consultation.getStatus() == ConsultationStatus.CANCELLED
-                                                        || consultation.getCalendarSlot() == null) {
-                                                date = consultation.getSnapshot().getDate();
-                                                time = consultation.getSnapshot().getStartTime();
-                                        } else {
-                                                date = consultation.getCalendarSlot().getDate();
-                                                time = consultation.getCalendarSlot().getStartTime();
-                                        }
+                GenericUtils.checkIsEmptyList(consultations);
 
-                                        LocalDate today = SystemClockUtils.getCurrentDate();
-                                        LocalTime now = SystemClockUtils.getCurrentTime();
-
-                                        if (date.equals(today)) {
-                                                return !time.isBefore(now);
-                                        }
-                                        return date.isAfter(today);
-                                })
-                                .map(ConsultationMapper::toResponseDTO)
-                                .toList();
+                return ConsultationUtilsService.getFilteredConsultationByDayAndHour(consultations);
         }
 
         public ConsultationResponseDTO reschedule(UUID consultationId, RescheduleConsultationDTO rescheduleDTO) {
-                ConsultationEntity consultation = RepositoryUtils.findOrThrow(
-                                consultationRepository.findById(consultationId),
-                                () -> new NotFoundException("Consulta"));
+                ConsultationEntity consultation = findConsultationWithCalendar(consultationId);
 
-                CalendarEntity calendar = findOrThrow(
-                                calendarRepository.findByIdWithDoctorAndSecretary(rescheduleDTO.getNewCalendarId()),
-                                () -> new CalendarNotFoundException("Horário Indisponível"));
+                CalendarEntity calendar = calendarService
+                                .findByCalendarIdWithDoctorAndSecretary(rescheduleDTO.getNewCalendarId());
 
                 consultationUtilsService.checkStatusAndPermissions(consultation);
                 consultationUtilsService.changeCalendarStatus(consultation, CalendarStatus.AVAILABLE);
@@ -185,14 +146,18 @@ public class ConsultationService {
 
         public ConsultationResponseDTO changeConsultationStatus(UUID consultationId, ConsultationStatus status) {
                 consultationUtilsService.checkUserAction(status);
+
                 ConsultationEntity consultation = findConsultation(consultationId);
                 consultationUtilsService.checkStatusAndPermissions(consultation);
-                boolean isDateAndHourWithInPeriod = consultationUtilsService.dateAndHourAvaliable(
-                                consultation.getCalendarSlot().getDate(),
-                                consultation.getCalendarSlot().getStartTime());
+
+                LocalDate consultationDate = consultation.getCalendarSlot().getDate();
+                LocalTime consultationTime = consultation.getCalendarSlot().getStartTime();
+                boolean isDateAndHourWithInPeriod = consultationUtilsService.dateAndHourAvaliable(consultationDate, consultationTime);
+
                 if (!isDateAndHourWithInPeriod && status != ConsultationStatus.CONFIRMED) {
                         throw new UnalterableException("Consulta");
                 }
+
                 consultation.setStatus(status);
                 consultationRepository.save(consultation);
                 return ConsultationMapper.toResponseDTO(consultation);
@@ -213,8 +178,9 @@ public class ConsultationService {
         }
 
         private void calendarHasHealthPlan(List<CalendarHealthPlanEntity> calendarHealthPlans, String healthPlan) {
-                boolean hasPlan = calendarHealthPlans.stream().anyMatch(chp -> chp.getHealthPlan().getName().equals(healthPlan));
-                if(!hasPlan){
+                boolean hasPlan = calendarHealthPlans.stream()
+                                .anyMatch(chp -> chp.getHealthPlan().getName().equals(healthPlan));
+                if (!hasPlan) {
                         throw new UnavaliableTimeException("Esse plano não está disponível para esse horário");
                 }
         }

@@ -8,12 +8,12 @@ import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendarHealthPlan.dto.CalendarHealthPlanResponseCreationDTO;
 import br.com.meusintoma.modules.calendarHealthPlan.entity.CalendarHealthPlanEntity;
 import br.com.meusintoma.modules.healthPlan.entity.HealthPlanEntity;
-import br.com.meusintoma.utils.common.AssociationStatusResult;
+import br.com.meusintoma.utils.common.StatusResult;
 
 public class CalendarHealthPlanServiceUtils {
 
     public static void addResult(CalendarEntity calendar, UUID doctorId, String healthPlanName,
-            AssociationStatusResult associationStatus, String errorMessage,
+            StatusResult associationStatus, String errorMessage,
             List<CalendarHealthPlanResponseCreationDTO> results) {
 
         results.add(CalendarHealthPlanResponseCreationDTO.builder()
@@ -30,7 +30,7 @@ public class CalendarHealthPlanServiceUtils {
     }
 
     public static void addResult(UUID doctorId, String healthPlanName,
-            AssociationStatusResult associationStatus, String message, List<CalendarHealthPlanResponseCreationDTO> results) {
+            StatusResult associationStatus, String message, List<CalendarHealthPlanResponseCreationDTO> results) {
 
         results.add(CalendarHealthPlanResponseCreationDTO.builder()
                 .calendarStatus(null)

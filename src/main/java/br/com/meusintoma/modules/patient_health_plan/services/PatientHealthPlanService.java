@@ -20,7 +20,7 @@ import br.com.meusintoma.modules.patient_health_plan.entity.PatientHealthPlanEnt
 import br.com.meusintoma.modules.patient_health_plan.mapper.PatientHealthPlanMapper;
 import br.com.meusintoma.modules.patient_health_plan.repository.PatientHealthPlanRepository;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
-import br.com.meusintoma.utils.common.AssociationStatusResult;
+import br.com.meusintoma.utils.common.StatusResult;
 import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
 
@@ -53,18 +53,18 @@ public class PatientHealthPlanService {
                 boolean alreadyExists = patientHealthPlanRepository.existsByPatientAndHealthPlan(patient, plan);
                 if (alreadyExists) {
                     PatientHealthPlansServiceUtils.addResult(results, plan,
-                            AssociationStatusResult.ALREADY_EXISTS,
+                            StatusResult.ALREADY_EXISTS,
                             "Plan already associated");
                     continue;
                 }
                 PatientHealthPlanEntity association = PatientHealthPlansServiceUtils
                         .buildPatientHealthPlanEntity(patient, plan, cardId);
                 newAssociations.add(association);
-                PatientHealthPlansServiceUtils.addResult(results, plan, AssociationStatusResult.ASSOCIATED,
+                PatientHealthPlansServiceUtils.addResult(results, plan, StatusResult.ASSOCIATED,
                         "Patient Associated");
             } catch (Exception e) {
                 results.add(
-                        PatientHealthPlansServiceUtils.buildResult(planName, AssociationStatusResult.ERROR,
+                        PatientHealthPlansServiceUtils.buildResult(planName, StatusResult.ERROR,
                                 "Error associating plan: " + e.getMessage()));
             }
         }

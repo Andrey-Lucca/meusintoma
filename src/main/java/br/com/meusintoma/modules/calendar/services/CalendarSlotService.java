@@ -6,17 +6,21 @@ import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.com.meusintoma.modules.calendar.dto.CalendarResultDTO;
 import br.com.meusintoma.modules.calendar.dto.CalendarWeeklySlotsGenerationDTO;
 import br.com.meusintoma.modules.calendar.dto.GenerateDailySlotsRequestDTO;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
-import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.calendar.mapper.CalendarMapperDTO;
 import br.com.meusintoma.modules.calendar.repository.CalendarRepository;
 import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
+import br.com.meusintoma.modules.doctor.services.DoctorService;
+import br.com.meusintoma.utils.common.StatusResult;
+import br.com.meusintoma.utils.helpers.SystemClockUtils;
 
 @Service
 public class CalendarSlotService {
@@ -24,36 +28,81 @@ public class CalendarSlotService {
     @Autowired
     CalendarRepository calendarRepository;
 
-    public List<CalendarEntity> generateDailySlots(DoctorEntity doctor, GenerateDailySlotsRequestDTO request) {
+    @Autowired
+    CalendarService calendarService;
+
+    @Autowired
+    CalendarPermissionService calendarPermissionService;
+
+    @Autowired
+    DoctorService doctorService;
+
+    public List<CalendarResultDTO> generateDailySlots(GenerateDailySlotsRequestDTO request) {
 
         if (!request.isValid()) {
             throw new IllegalArgumentException("Parâmetros inválidos para geração de slots");
         }
 
-        List<CalendarEntity> slots = new ArrayList<>(); // Aqui cria-se a lista parar adicionar os horários no
-                                                        // calendário
-        LocalTime current = request.getStartTime(); // Inicialmente é a hora inicial, exemplo: 08:00, porém vai mudando
-                                                    // conforme o passar das horas.
+        calendarPermissionService.validatePermissionCalendar(request.getDoctorId(),
+                Optional.ofNullable(request.getDate()));
 
-        var slotDurationMinutes = request.getSlotDurationMinutes();
-        var endTime = request.getEndTime();
+        DoctorEntity doctor = doctorService.findDoctor(request.getDoctorId());
 
-        while (current.plusMinutes(slotDurationMinutes).isBefore(endTime)
-                || current.plusMinutes(slotDurationMinutes).equals(endTime)) {
+        List<CalendarResultDTO> results = new ArrayList<>();
 
-            if (request.getBreakStart() == null || request.getBreakEnd() == null
-                    || !(current.isBefore(request.getBreakEnd()) && current.plusMinutes(slotDurationMinutes)
-                            .isAfter(request.getBreakStart()))) {
-                CalendarEntity calendarEntity = CalendarEntity.builder().date(request.getDate())
-                        .startTime(current)
-                        .endTime(current.plusMinutes(request.getSlotDurationMinutes())).doctor(doctor)
-                        .calendarStatus(CalendarStatus.AVAILABLE).build();
-                slots.add(calendarEntity);
-            }
-            current = current.plusMinutes(request.getSlotDurationMinutes()); // Pega a hora atual e soma tempo da
-                                                                             // consulta. Exemplo: 08h + 01h = 09h
+        List<CalendarEntity> slots = new ArrayList<>();
+
+        LocalTime current;
+        int slotDurationMinutes = request.getSlotDurationMinutes();
+
+        if (request.getDate().isEqual(LocalDate.now())) {
+            LocalTime now = SystemClockUtils.getCurrentTime();
+            current = now.isAfter(request.getStartTime())
+                    ? CalendarServiceUtils.roundUpToNearestSlot(now, slotDurationMinutes)
+                    : request.getStartTime();
+        } else {
+            current = request.getStartTime();
         }
-        return slots;
+
+        LocalTime endTime = request.getEndTime();
+
+        while (true) {
+            LocalTime endOfSlot = current.plusMinutes(slotDurationMinutes);
+            if (endOfSlot.isAfter(endTime)) {
+                break;
+            }
+            
+            boolean isBreaksNull = request.getBreakStart() == null || request.getBreakEnd() == null;
+            boolean isInInterval = current.isBefore(request.getBreakEnd())
+                    && current.plusMinutes(slotDurationMinutes).isAfter(request.getBreakStart());
+
+            if (isBreaksNull || !isInInterval) {
+                boolean isDoctorAlreadyHaveCalendarSlot = calendarService.doctorAlreadyHaveCalendarSlot(doctor.getId(),
+                        request.getDate(), current);
+
+                if (isDoctorAlreadyHaveCalendarSlot) {
+                    CalendarServiceUtils.addResult(results, StatusResult.ALREADY_EXISTS, null,
+                            "Esse horário já consta no seu calendário");
+                } else {
+                    try {
+                        CalendarEntity calendar = CalendarServiceUtils.createCalendarSlot(doctor, current, request);
+                        slots.add(calendar);
+                        CalendarServiceUtils.addResult(results, StatusResult.CREATED, calendar,
+                                "Horário criado com sucesso");
+                    } catch (Exception e) {
+                        CalendarServiceUtils.addResult(results, StatusResult.ERROR, null,
+                                "Não foi possível associar o calendário");
+                    }
+                }
+            } else {
+                CalendarServiceUtils.addResult(results, StatusResult.ERROR, null,
+                        "O horário invade o horário de parada, pulando");
+            }
+            current = current.plusMinutes(slotDurationMinutes);
+        }
+
+        saveAll(slots);
+        return results;
     }
 
     public List<GenerateDailySlotsRequestDTO> generateWeeklySlots(DoctorEntity doctor,
@@ -81,7 +130,29 @@ public class CalendarSlotService {
         return weeklySlots;
     }
 
+    public List<CalendarResultDTO> generateWeeklyCalendarResults(CalendarWeeklySlotsGenerationDTO requestDTO) {
+        requestDTO.setRequestDate(LocalDate.now());
+
+        calendarPermissionService.validatePermissionCalendar(
+                requestDTO.getDoctorId(),
+                Optional.ofNullable(requestDTO.getDate()));
+
+        DoctorEntity doctor = doctorService.findDoctor(requestDTO.getDoctorId());
+
+        List<GenerateDailySlotsRequestDTO> weeklySlots = generateWeeklySlots(doctor, requestDTO);
+
+        List<CalendarResultDTO> allResults = new ArrayList<>();
+
+        for (GenerateDailySlotsRequestDTO dailyRequest : weeklySlots) {
+            List<CalendarResultDTO> dailyResults = generateDailySlots(dailyRequest);
+            allResults.addAll(dailyResults);
+        }
+
+        return allResults;
+    }
+
     public List<CalendarEntity> saveAll(List<CalendarEntity> slots) {
         return calendarRepository.saveAll(slots);
     }
+
 }

@@ -28,11 +28,4 @@ public interface CalendarHealthPlanRepository extends JpaRepository<CalendarHeal
                             WHERE chp.calendar.id = :calendarId
                         """)
         List<CalendarHealthPlanEntity> findLinkedHealthPlansByCalendarId(@Param("calendarId") UUID calendarId);
-
-        // @Query("DELETE FROM calendar_health_plan chp WHERE chp.calendar.id =
-        // :calendarId AND chp.healthPlan.id = :healthPlanId")
-        // Optional<CalendarHealthPlanEntity>
-        // deleteByCalendarIdAndHealthPlanName(@Param("calendarId") UUID calendarId,
-        // @Param("healthPlanId") UUID healthPlanId);
-
 }

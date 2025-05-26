@@ -16,11 +16,14 @@ import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.calendar.services.CalendarService;
+import br.com.meusintoma.modules.consultation.dto.ConsultationResponseDTO;
 import br.com.meusintoma.modules.consultation.entity.ConsultationEntity;
 import br.com.meusintoma.modules.consultation.entity.SnapShotInfo;
 import br.com.meusintoma.modules.consultation.enums.ConsultationStatus;
 import br.com.meusintoma.modules.consultation.exceptions.AlreadyHaveConsultationException;
+import br.com.meusintoma.modules.consultation.mapper.ConsultationMapper;
 import br.com.meusintoma.modules.consultation.repository.ConsultationRepository;
+import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
 import br.com.meusintoma.utils.helpers.SystemClockUtils;
 
@@ -76,6 +79,31 @@ public class ConsultationUtilsService {
         return snapshot;
     }
 
+    public static SnapShotInfo createConsultationSnapshot() {
+        SnapShotInfo snapshot = SnapShotInfo.builder()
+                .date(null)
+                .startTime(null)
+                .endTime(null)
+                .build();
+        return snapshot;
+    }
+
+    public static ConsultationEntity createConsultation(CalendarEntity calendar, String healthPlan,
+            PatientEntity patient,
+            SnapShotInfo snapshot) {
+        ConsultationEntity consultation = ConsultationEntity.builder().calendarSlot(calendar)
+                .status(ConsultationStatus.PENDING).patient(patient)
+                .doctorId(calendar.getDoctor().getId())
+                .secretaryId(calendar.getDoctor().getSecretary() != null
+                        ? calendar.getDoctor().getSecretary().getId()
+                        : null)
+                .canceledBy(null)
+                .snapshot(snapshot)
+                .healthPlan(healthPlan)
+                .build();
+        return consultation;
+    }
+
     public void checkConsultationStatus(ConsultationEntity consultation) {
         if (!statuses.contains(consultation.getStatus())) {
             throw new UnalterableException("Consulta");
@@ -114,6 +142,35 @@ public class ConsultationUtilsService {
         }
     }
 
+    public static List<ConsultationResponseDTO> getFilteredConsultationByDayAndHour(
+            List<ConsultationEntity> consultations) {
+        return consultations.stream()
+                .filter(consultation -> {
+                    LocalDate consultationDate;
+                    LocalTime consultationTime;
+                    boolean isStatusCanceled = consultation.getStatus() == ConsultationStatus.CANCELLED;
+                    boolean isCalendarSlotNull = consultation.getCalendarSlot() == null;
+
+                    if (isStatusCanceled || isCalendarSlotNull) {
+                        consultationDate = consultation.getSnapshot().getDate();
+                        consultationTime = consultation.getSnapshot().getStartTime();
+                    } else {
+                        consultationDate = consultation.getCalendarSlot().getDate();
+                        consultationTime = consultation.getCalendarSlot().getStartTime();
+                    }
+
+                    LocalDate today = SystemClockUtils.getCurrentDate();
+                    LocalTime now = SystemClockUtils.getCurrentTime();
+
+                    if (consultationDate.equals(today)) {
+                        return !consultationTime.isBefore(now);
+                    }
+                    return consultationDate.isAfter(today);
+                })
+                .map(ConsultationMapper::toResponseDTO)
+                .toList();
+    }
+
     public void cancelConsultation(ConsultationEntity consultation, SnapShotInfo snapshot) {
         consultation.setCalendarSlot(null);
         consultation.setSnapshot(snapshot);
@@ -131,7 +188,7 @@ public class ConsultationUtilsService {
         changeCalendarStatus(consultation, CalendarStatus.UNAVAILABLE);
     }
 
-    public void alredyHaveConsultation(List<ConsultationEntity> consultations, UUID doctorId) {
+    public void alreadyHaveConsultation(List<ConsultationEntity> consultations, UUID doctorId) {
 
         boolean exists = consultations.stream()
                 .anyMatch(c -> c.getDoctorId().equals(doctorId) && statuses.contains(c.getStatus()));

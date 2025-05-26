@@ -20,7 +20,7 @@ import br.com.meusintoma.modules.calendarHealthPlan.entity.CalendarHealthPlanEnt
 import br.com.meusintoma.modules.calendarHealthPlan.repository.CalendarHealthPlanRepository;
 import br.com.meusintoma.modules.healthPlan.entity.HealthPlanEntity;
 import br.com.meusintoma.modules.healthPlan.services.HealthPlanService;
-import br.com.meusintoma.utils.common.AssociationStatusResult;
+import br.com.meusintoma.utils.common.StatusResult;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
 import jakarta.transaction.Transactional;
 
@@ -63,7 +63,7 @@ public class CalendarHealthPlanService {
 
                             if (exists) {
                                 CalendarHealthPlanServiceUtils.addResult(calendar, doctorId, healthPlanName,
-                                        AssociationStatusResult.ALREADY_EXISTS, "Relação já existente", results);
+                                        StatusResult.ALREADY_EXISTS, "Relação já existente", results);
                                 continue;
                             }
                             try {
@@ -72,20 +72,20 @@ public class CalendarHealthPlanService {
                                         .createCalendarHealthPlan(calendar, healthPlan);
                                 calendarHealthPlansToSave.add(calendarHealthPlan);
                                 CalendarHealthPlanServiceUtils.addResult(calendar, doctorId, healthPlanName,
-                                        AssociationStatusResult.ASSOCIATED, "Relação criada com sucesso", results);
+                                        StatusResult.ASSOCIATED, "Relação criada com sucesso", results);
                             } catch (NotFoundException e) {
                                 CalendarHealthPlanServiceUtils.addResult(calendar, doctorId, healthPlanName,
-                                        AssociationStatusResult.ERROR, e.getMessage(), results);
+                                        StatusResult.ERROR, e.getMessage(), results);
                             }
                         }
                     } catch (CustomAccessDeniedException | InvalidDateException e) {
                         CalendarHealthPlanServiceUtils.addResult(calendar, doctorId, null,
-                                AssociationStatusResult.ERROR, e.getMessage(), results);
+                                StatusResult.ERROR, e.getMessage(), results);
                     }
 
                 } catch (Exception e) {
                     CalendarHealthPlanServiceUtils.addResult(doctorId, null,
-                            AssociationStatusResult.ERROR, e.getMessage(), results);
+                            StatusResult.ERROR, e.getMessage(), results);
                 }
             }
         }
