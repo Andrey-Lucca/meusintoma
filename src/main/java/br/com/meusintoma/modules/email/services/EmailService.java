@@ -1,9 +1,6 @@
 package br.com.meusintoma.modules.email.services;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +9,6 @@ import org.springframework.stereotype.Service;
 import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.email.dto.EmailResponseDTO;
 import br.com.meusintoma.modules.email.entity.EmailConfirmationTokenEntity;
-import br.com.meusintoma.modules.email.exception.TokenGenerationException;
 import br.com.meusintoma.modules.email.repository.EmailConfirmationRepository;
 import br.com.meusintoma.modules.user.entity.UserEntity;
 import br.com.meusintoma.utils.helpers.CryptoUtils;
@@ -40,22 +36,42 @@ public class EmailService {
 
     @Transactional
     public void generateAndSendConfirmation(UserEntity user) {
-        EmailConfirmationTokenEntity email = generateUniqueEmailToken(user);
-        emailConfirmationRepository.save(email);
-        emailAsyncService.sendConfirmationEmail(user.getEmail(), generateBodyAndSubject(email).get("SUBJECT"),
-                generateBodyAndSubject(email).get("BODY"));
+        String token = cryptoUtils.encrypt(user.getId().toString());
+        LocalDateTime expiresAt = LocalDateTime.now().plusHours(1);
+
+        EmailConfirmationTokenEntity emailToken = EmailUtilsService.createEmailConfirmationToken(token, expiresAt,
+                user);
+        emailConfirmationRepository.save(emailToken);
+
+        String confirmationUrl = url + "/email/confirm?token=" + token;
+        String subject = "Confirmação de cadastro - APP Meu Sintoma";
+
+        String body = EmailUtilsService.buildEmailHtml(
+                "Confirmação de Cadastro",
+                "Clique no botão abaixo para confirmar seu e-mail.",
+                "Confirmar Cadastro",
+                confirmationUrl);
+
+        emailAsyncService.sendHtmlEmail(user.getEmail(), subject, body);
     }
 
     public void resendEmail(String userEmail) {
-        EmailConfirmationTokenEntity email = RepositoryUtils.findOrThrow(
+        EmailConfirmationTokenEntity emailToken = RepositoryUtils.findOrThrow(
                 emailConfirmationRepository.findByEmail(userEmail),
-                () -> new NotFoundException("Email"));
+                () -> new NotFoundException("Email não encontrado"));
 
-        EmailUtilsService.checkIsValidConfirmation(email);
+        EmailUtilsService.checkIsValidConfirmation(emailToken);
 
-        emailAsyncService.sendConfirmationEmail(email.getUser().getEmail(),
-                generateBodyAndSubject(email).get("SUBJECT"),
-                generateBodyAndSubject(email).get("BODY"));
+        String confirmationUrl = url + "/email/confirm?token=" + cryptoUtils.encrypt(emailToken.getToken());
+        String subject = "Confirmação de cadastro - APP Meu Sintoma";
+
+        String body = EmailUtilsService.buildEmailHtml(
+                "Confirmação de Cadastro",
+                "Clique no botão abaixo para confirmar seu e-mail.",
+                "Confirmar Cadastro",
+                confirmationUrl);
+
+        emailAsyncService.sendHtmlEmail(emailToken.getUser().getEmail(), subject, body);
     }
 
     public EmailResponseDTO confirmEmail(String cryptoToken) {
@@ -71,29 +87,4 @@ public class EmailService {
 
         return emailResponse;
     }
-
-    private EmailConfirmationTokenEntity generateUniqueEmailToken(UserEntity user) {
-        int maxAttempts = 5;
-        for (int i = 0; i < maxAttempts; i++) {
-            String token = UUID.randomUUID().toString();
-            boolean exists = emailConfirmationRepository.findByToken(token).isPresent();
-            if (!exists) {
-                LocalDateTime expiresAt = LocalDateTime.now().plusHours(1);
-                return EmailUtilsService.createEmailConfirmationToken(token, expiresAt, user);
-            }
-        }
-        throw new TokenGenerationException();
-    }
-
-    private Map<String, String> generateBodyAndSubject(EmailConfirmationTokenEntity email) {
-        Map<String, String> bodySubject = new HashMap<>();
-        String confirmationUrl = url + "/email/confirm?token=" + cryptoUtils.encrypt(email.getToken());
-        String subject = "Confirmação de cadastro - APP Meu Sintoma";
-
-        String body = "Clique no link para confirmar seu cadastro: " + confirmationUrl;
-        bodySubject.put("SUBJECT", subject);
-        bodySubject.put("BODY", body);
-        return bodySubject;
-    }
-
 }

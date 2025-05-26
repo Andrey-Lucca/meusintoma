@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.meusintoma.exceptions.globalCustomException.ForbiddenException;
 import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.email.dto.EmailResponseDTO;
+import br.com.meusintoma.modules.email.dto.PasswordEmailResetRequestDTO;
 import br.com.meusintoma.modules.email.dto.ResendEmailDTO;
 import br.com.meusintoma.modules.email.exception.InvalidTokenException;
 import br.com.meusintoma.modules.email.exception.TokenGenerationException;
 import br.com.meusintoma.modules.email.services.EmailService;
+import br.com.meusintoma.modules.email.services.ResetPasswordService;
 
 @RestController
 @RequestMapping("/email")
@@ -23,6 +25,9 @@ public class EmailController {
 
     @Autowired
     EmailService emailService;
+
+    @Autowired
+    ResetPasswordService resetPasswordService;
 
     @GetMapping("/confirm")
     public ResponseEntity<Object> confirmEmail(@RequestParam String token) {
@@ -52,7 +57,41 @@ public class EmailController {
         } catch (TokenGenerationException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Não foi possível reenviar o e-mail");
+        }
+    }
+
+    @PostMapping("send-reset-password")
+    public ResponseEntity<?> sendEmailResetPassword(@RequestBody PasswordEmailResetRequestDTO requestDTO) {
+        try {
+            resetPasswordService.sendEmailResetPassword(requestDTO);
+            return ResponseEntity.ok("Email enviado com sucesso");
+        } catch (NotFoundException e) {
+            throw e;
+        } catch (ForbiddenException e) {
+            throw e;
+        } catch (TokenGenerationException e) {
+            throw e;
+        } catch (Exception e) {
+            //e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Não foi possível reenviar o e-mail");
+        }
+    }
+
+    @PostMapping("reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody PasswordEmailResetRequestDTO requestDTO, @RequestParam String token) {
+        try {
+            resetPasswordService.resetPassword(requestDTO, token);
+            return ResponseEntity.ok("Senha alterada");
+        } catch (NotFoundException e) {
+            throw e;
+        } catch (ForbiddenException e) {
+            throw e;
+        } catch (TokenGenerationException e) {
+            throw e;
+        } catch (Exception e) {
+            //e.printStackTrace();
             return ResponseEntity.internalServerError().body("Não foi possível reenviar o e-mail");
         }
     }

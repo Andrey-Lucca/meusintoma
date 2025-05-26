@@ -31,27 +31,27 @@ public class EmailUtilsService {
                 .build();
     }
 
-    public static String buildConfirmationHtml(String confirmationUrl) {
+    public static String buildEmailHtml(String title, String message, String buttonText, String actionUrl) {
         return """
-                    <html>
-                    <body style="font-family: Arial, sans-serif; color: #333;">
-                        <h2 style="color: #2E86C1;">Confirmação de Cadastro</h2>
-                        <p>Olá,</p>
-                        <p>Obrigado por se cadastrar! Clique no botão abaixo para confirmar seu cadastro:</p>
-                        <a href="%s" style="
-                            background-color: #2E86C1;
-                            color: white;
-                            padding: 10px 20px;
-                            text-decoration: none;
-                            border-radius: 5px;
-                            display: inline-block;
-                            margin-top: 10px;
-                        ">Confirmar Cadastro</a>
-                        <p style="margin-top: 20px;">Ou copie e cole o link no navegador:</p>
-                        <p><a href="%s">%s</a></p>
-                    </body>
-                    </html>
-                """.formatted(confirmationUrl, confirmationUrl, confirmationUrl);
+                <html>
+                <body style="font-family: Arial, sans-serif; color: #333;">
+                    <h2 style="color: #2E86C1;">%s</h2>
+                    <p>Olá,</p>
+                    <p>%s</p>
+                    <a href="%s" style="
+                        background-color: #2E86C1;
+                        color: white;
+                        padding: 10px 20px;
+                        text-decoration: none;
+                        border-radius: 5px;
+                        display: inline-block;
+                        margin-top: 10px;
+                    ">%s</a>
+                    <p style="margin-top: 20px;">Ou copie e cole o link no navegador:</p>
+                    <p><a href="%s">%s</a></p>
+                </body>
+                </html>
+                """.formatted(title, message, actionUrl, buttonText, actionUrl, actionUrl);
     }
 
     public static void checkIsValidConfirmation(EmailConfirmationTokenEntity email) {

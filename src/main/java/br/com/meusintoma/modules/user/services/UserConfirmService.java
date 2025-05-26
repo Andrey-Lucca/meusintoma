@@ -1,6 +1,7 @@
 package br.com.meusintoma.modules.user.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.modules.user.entity.UserEntity;
@@ -11,9 +12,17 @@ public class UserConfirmService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
     
     public void confirmUser(UserEntity user){
         user.setEnabled(true);
+        userRepository.save(user);
+    }
+
+    public void setNewPassword(UserEntity user, String newPassword){
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 }

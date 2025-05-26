@@ -19,20 +19,17 @@ public class EmailAsyncService {
     private String username;
 
     @Async
-    public void sendConfirmationEmail(String to, String subject, String confirmationUrl) {
+    public void sendHtmlEmail(String to, String subject, String htmlBody) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setFrom(username);
             helper.setTo(to);
             helper.setSubject(subject);
-
-            String htmlContent = EmailUtilsService.buildConfirmationHtml(confirmationUrl);
-            helper.setText(htmlContent, true);
-
+            helper.setText(htmlBody, true);
             mailSender.send(message);
         } catch (MessagingException e) {
-            throw new RuntimeException("Erro ao enviar e-mail de confirmação");
+            throw new RuntimeException("Erro ao enviar e-mail para " + to);
         }
     }
 }
