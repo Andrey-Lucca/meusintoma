@@ -3,8 +3,9 @@ package br.com.meusintoma.modules.secretary.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
+import br.com.meusintoma.modules.doctorSecretary.entity.DoctorSecretaryEntity;
 import br.com.meusintoma.modules.user.entity.UserEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.Builder;
@@ -21,6 +22,6 @@ import lombok.experimental.SuperBuilder;
 
 public class SecretaryEntity extends UserEntity {
 
-    @OneToMany(mappedBy = "secretary")
-    @Builder.Default private List<DoctorEntity> doctors = new ArrayList<>();
+    @OneToMany(mappedBy = "secretary", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default private List<DoctorSecretaryEntity> secretaryDoctorsAssociateds = new ArrayList<>();
 }

@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import br.com.meusintoma.exceptions.globalCustomException.AlreadyExistsException;
 import br.com.meusintoma.exceptions.globalCustomException.BadRequestException;
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
 import br.com.meusintoma.exceptions.globalCustomException.ErrorResponse;
@@ -78,6 +79,15 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 "Algo deu errado com sua requisição, por favor verifique");
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleAlreadyExists(AlreadyExistsException ex) {
+        ErrorResponse error = new ErrorResponse(
+                "ALREADY_EXISTS",
+                ex.getMessage(),
+                "Você tentou adicionar algo duplicado no sistema.");
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
 }
