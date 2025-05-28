@@ -59,8 +59,15 @@ public class CalendarService {
         final LocalTime currentTime = SystemClockUtils.getCurrentTime();
         List<CalendarEntity> calendars = calendarRepository.findAllByDoctorId(doctorId);
         return calendars.stream().filter(calendar -> calendar.getCalendarStatus().equals(CalendarStatus.AVAILABLE))
-                .filter(calendar -> !calendar.getDate().isBefore(currentDate)
-                        && !calendar.getStartTime().isBefore(currentTime))
+                .filter(calendar -> {
+                    LocalDate calendarDate = calendar.getDate();
+                    LocalTime startTime = calendar.getStartTime();
+                    if (calendarDate.isEqual(currentDate)) {
+                        return startTime.isAfter(currentTime);
+                    }
+
+                    return calendarDate.isAfter(currentDate);
+                })
                 .map(CalendarMapperDTO::toResponseDTO).toList();
     }
 
@@ -159,7 +166,7 @@ public class CalendarService {
     }
 
     public void checkCalendarPermissions(UUID doctorId, LocalDate startDate) {
-        calendarPermissionService.validatePermissionCalendar(doctorId, Optional.of(startDate));
+        calendarPermissionService.validatePermissionCalendar(doctorId, Optional.ofNullable(startDate));
     }
 
 }

@@ -1,5 +1,6 @@
 package br.com.meusintoma.modules.doctorSecretary.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -21,6 +22,7 @@ import br.com.meusintoma.modules.secretary.entity.SecretaryEntity;
 import br.com.meusintoma.modules.secretary.services.SecretaryService;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
 import br.com.meusintoma.utils.common.AssociationStatus;
+import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
 import br.com.meusintoma.utils.helpers.SystemClockUtils;
 
@@ -37,6 +39,7 @@ public class DoctorSecretaryService {
     DoctorSecretaryRepository doctorSecretaryRepository;
 
     public DoctorSecretaryResponseDTO association(UUID doctorId, UUID secretaryId) {
+        checkAssociationRequestPermission(doctorId, secretaryId);
         DoctorEntity doctor = doctorService.findDoctor(doctorId);
 
         SecretaryEntity secretary = secretaryService.findSecretaryById(secretaryId);
@@ -80,12 +83,16 @@ public class DoctorSecretaryService {
     }
 
     public List<DoctorSecretaryResponseDTO> getAssociatedDoctorSecretaryByDoctorId(UUID doctorId) {
+        checkUserRequest(doctorId);
+
         List<DoctorSecretaryEntity> doctorSecretaryRelationships = doctorSecretaryRepository
                 .findAllRelationshipByDoctorId(doctorId);
 
         for (DoctorSecretaryEntity doctorSecretaryRelationship : doctorSecretaryRelationships) {
             checkRelationshipPermissions(doctorSecretaryRelationship);
         }
+
+        GenericUtils.checkIsEmptyList(doctorSecretaryRelationships);
 
         return doctorSecretaryRelationships.stream().map(DoctorSecretaryMapper::toDoctorSecretaryResponse).toList();
     }
@@ -98,6 +105,8 @@ public class DoctorSecretaryService {
     }
 
     public List<DoctorSecretaryResponseDTO> getAssociatedDoctorSecretaryBySecretaryId(UUID secretaryId) {
+        checkUserRequest(secretaryId);
+
         List<DoctorSecretaryEntity> doctorSecretaryRelationships = doctorSecretaryRepository
                 .findAllRelationshipBySecretaryId(secretaryId);
 
@@ -105,7 +114,15 @@ public class DoctorSecretaryService {
             checkRelationshipPermissions(doctorSecretaryRelationship);
         }
 
+        GenericUtils.checkIsEmptyList(doctorSecretaryRelationships);
         return doctorSecretaryRelationships.stream().map(DoctorSecretaryMapper::toDoctorSecretaryResponse).toList();
+    }
+
+    public List<UUID> getAllDoctorsIdsBySecretaryId(UUID secretaryId) {
+        List<UUID> doctorSecretaryRelationships = doctorSecretaryRepository
+                .findAllDoctorsBySecretaryId(secretaryId);
+
+        return doctorSecretaryRelationships;
     }
 
     public List<DoctorSecretaryResponseDTO> getAllInvitesByUserId() {
@@ -114,7 +131,6 @@ public class DoctorSecretaryService {
         List<DoctorSecretaryEntity> invites = doctorSecretaryRepository.findAllInvitesByUserId(userId);
 
         return invites.stream().map(DoctorSecretaryMapper::toDoctorSecretaryResponse).toList();
-
     }
 
     public void checkAssociation(UUID doctorId, UUID secretaryId) {
@@ -128,6 +144,22 @@ public class DoctorSecretaryService {
         boolean relationshipExists = doctorSecretaryRepository.alreadyExistsRelationship(doctorId, secretaryId);
         if (relationshipExists) {
             throw new AlreadyExistsException("O relacionamento entre esse doutor e secretária");
+        }
+    }
+
+    private void checkUserRequest(UUID targetId) {
+        UUID authenticatedUserId = AuthValidatorUtils.getAuthenticatedUserId();
+
+        if (!authenticatedUserId.equals(targetId)) {
+            throw new CustomAccessDeniedException("Você não tem permissão para acessar essas informações.");
+        }
+    }
+
+    private void checkAssociationRequestPermission(UUID doctorId, UUID secretaryId) {
+        UUID userId = AuthValidatorUtils.getAuthenticatedUserId();
+        List<UUID> allowedIds = new ArrayList<>(List.of(doctorId, secretaryId));
+        if (!allowedIds.contains(userId)) {
+            throw new CustomAccessDeniedException("Você não faz parte da criação dessa assosiação");
         }
     }
 

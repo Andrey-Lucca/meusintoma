@@ -1,6 +1,7 @@
 package br.com.meusintoma.modules.doctorSecretary.dto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import br.com.meusintoma.utils.common.AssociationStatus;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DoctorSecretaryResponseDTO {
     
+    private UUID id;
     private String doctor;
     private String secretary;
     private LocalDateTime associatedAt;

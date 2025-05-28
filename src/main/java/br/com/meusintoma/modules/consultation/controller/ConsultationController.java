@@ -71,7 +71,7 @@ public class ConsultationController {
         } catch (NoContentException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             return ResponseEntity.internalServerError().body("Algo deu errado ao exibir as consultas");
         }
     }
@@ -116,6 +116,8 @@ public class ConsultationController {
             return ResponseEntity.ok().body(updated);
         } catch (NotFoundException | CustomAccessDeniedException e) {
             throw e;
+        } catch (UnavaliableTimeException e) {
+            throw e;
         } catch (UnalterableException e) {
             throw e;
         } catch (Exception e) {
@@ -134,7 +136,6 @@ public class ConsultationController {
         } catch (UnalterableException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Algo deu errado ao cancelar a consulta");
         }
     }

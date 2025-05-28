@@ -1,6 +1,7 @@
 package br.com.meusintoma.modules.email.services;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,14 +37,15 @@ public class EmailService {
 
     @Transactional
     public void generateAndSendConfirmation(UserEntity user) {
-        String token = cryptoUtils.encrypt(user.getId().toString());
+        String rawToken = UUID.randomUUID().toString(); 
+        String cryptoToken = cryptoUtils.encrypt(rawToken);
         LocalDateTime expiresAt = LocalDateTime.now().plusHours(1);
 
-        EmailConfirmationTokenEntity emailToken = EmailUtilsService.createEmailConfirmationToken(token, expiresAt,
+        EmailConfirmationTokenEntity emailToken = EmailUtilsService.createEmailConfirmationToken(rawToken, expiresAt,
                 user);
         emailConfirmationRepository.save(emailToken);
 
-        String confirmationUrl = url + "/email/confirm?token=" + token;
+        String confirmationUrl = url + "/email/confirm?token=" + cryptoToken;
         String subject = "Confirmação de cadastro - APP Meu Sintoma";
 
         String body = EmailUtilsService.buildEmailHtml(

@@ -27,6 +27,7 @@ import br.com.meusintoma.modules.consultation.entity.SnapShotInfo;
 import br.com.meusintoma.modules.consultation.enums.ConsultationStatus;
 import br.com.meusintoma.modules.consultation.mapper.ConsultationMapper;
 import br.com.meusintoma.modules.consultation.repository.ConsultationRepository;
+import br.com.meusintoma.modules.doctorSecretary.services.DoctorSecretaryService;
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.modules.patient.repository.PatientRepository;
 import br.com.meusintoma.modules.patient.services.PatientService;
@@ -57,6 +58,9 @@ public class ConsultationService {
 
         @Autowired
         CalendarHealthPlanRepository calendarHealthPlanRepository;
+
+        @Autowired
+        DoctorSecretaryService doctorSecretaryService;
 
         public ConsultationEntity findConsultation(UUID consultationId) {
                 ConsultationEntity consultation = RepositoryUtils.findOrThrow(
@@ -111,7 +115,8 @@ public class ConsultationService {
                                 consultations = consultationRepository.findAllByDoctorId(userId);
                                 break;
                         case "SECRETARY":
-                                consultations = consultationRepository.findAllBySecretaryId(userId);
+                                List<UUID> doctorIds = doctorSecretaryService.getAllDoctorsIdsBySecretaryId(userId);
+                                consultations = consultationRepository.findAllByDoctorIdIn(doctorIds);
                                 break;
                         case "PATIENT":
                                 consultations = consultationRepository.findAllByPatientId(userId);
@@ -130,6 +135,11 @@ public class ConsultationService {
 
                 CalendarEntity calendar = calendarService
                                 .findByCalendarIdWithDoctor(rescheduleDTO.getNewCalendarId());
+
+                List<CalendarHealthPlanEntity> linkedPlansList = calendarHealthPlanRepository
+                                .findLinkedHealthPlansByCalendarId(calendar.getId());
+
+                calendarHasHealthPlan(linkedPlansList, consultation.getHealthPlan());
 
                 consultationUtilsService.checkStatusAndPermissions(consultation);
                 consultationUtilsService.changeCalendarStatus(consultation, CalendarStatus.AVAILABLE);

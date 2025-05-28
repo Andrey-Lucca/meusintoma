@@ -19,7 +19,8 @@ public class DoctorSecretaryMapper {
     }
 
     public static DoctorSecretaryResponseDTO toDoctorSecretaryResponse(DoctorSecretaryEntity doctorSecretary) {
-        return DoctorSecretaryResponseDTO.builder().doctor(doctorSecretary.getDoctor().getName())
+        return DoctorSecretaryResponseDTO.builder().id(doctorSecretary.getId())
+                .doctor(doctorSecretary.getDoctor().getName())
                 .secretary(doctorSecretary.getSecretary().getName())
                 .invitedAt(doctorSecretary.getInvitedAt())
                 .associatedAt(doctorSecretary.getAssociatedAt())

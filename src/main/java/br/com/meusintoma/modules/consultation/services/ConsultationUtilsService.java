@@ -123,9 +123,9 @@ public class ConsultationUtilsService {
     public void checkUserAction(ConsultationStatus status) {
         String role = AuthValidatorUtils.getCurrentUserRole();
 
-        boolean patientTryingInvalidAction = role.equals("PATIENT") && status != ConsultationStatus.CONFIRMED;
+        boolean patientTryingInvalidAction = role.equals("PATIENT") && (status != ConsultationStatus.CONFIRMED);
         boolean staffTryingInvalidAction = (role.equals("SECRETARY") || role.equals("DOCTOR"))
-                && status != ConsultationStatus.COMPLETED;
+                && (status != ConsultationStatus.COMPLETED);
 
         if (patientTryingInvalidAction || staffTryingInvalidAction) {
             throw new CustomAccessDeniedException("Você não tem permissão para realizar essa ação");

@@ -22,11 +22,12 @@ public interface ConsultationRepository extends JpaRepository<ConsultationEntity
 
     List<ConsultationEntity> findAllByPatientId(UUID patientId);
 
-    List<ConsultationEntity> findAllBySecretaryId(UUID secretaryId);
-
     @Query("SELECT c FROM consultation c WHERE c.doctorId = :doctorId AND c.patient.id = :patientId AND c.status IN :statuses")
     List<ConsultationEntity> findAllByDoctorAndPatientRelationship(@Param("doctorId") UUID doctorId,
             @Param("patientId") UUID patientId, List<ConsultationStatus> statuses);
+
+    List<ConsultationEntity> findAllByDoctorIdIn(List<UUID> doctorIds);
+ 
 
     @Query("SELECT c FROM consultation c JOIN calendarSlot cal WHERE cal.date < :today OR (cal.date = :today AND cal.startTime < :now)")
     List<ConsultationEntity> findExpiredConsultations(@Param("today") LocalDate today, @Param("now") LocalTime now);

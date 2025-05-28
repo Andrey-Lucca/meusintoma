@@ -8,14 +8,11 @@ import org.springframework.stereotype.Component;
 
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
 import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
-import br.com.meusintoma.modules.doctor.repository.DoctorRepository;
 import br.com.meusintoma.modules.doctorSecretary.services.DoctorSecretaryService;
+import br.com.meusintoma.utils.helpers.SystemClockUtils;
 
 @Component
 public class CalendarPermissionValidator {
-
-    @Autowired
-    DoctorRepository doctorRepository;
 
     @Autowired
     DoctorSecretaryService doctorSecretaryService;
@@ -35,7 +32,9 @@ public class CalendarPermissionValidator {
     }
 
     public void validateCalendarDatePermission(LocalDate requestDateDTO) {
-        LocalDate currentDate = LocalDate.now();
+
+        if(requestDateDTO == null) return;
+        LocalDate currentDate = SystemClockUtils.getCurrentDate();
         if (requestDateDTO.isBefore(currentDate)) {
             throw new InvalidDateException("A data fornecida tem que ser igual ou maior do que a data atual");
         }

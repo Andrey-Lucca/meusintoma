@@ -30,4 +30,6 @@ public interface DoctorSecretaryRepository extends JpaRepository<DoctorSecretary
     @Query("SELECT ds FROM doctor_secretary ds WHERE ds.secretary.id = :userId OR ds.doctor.id = :userId")
     List<DoctorSecretaryEntity> findAllInvitesByUserId(@Param("userId") UUID userId);
 
+    @Query("SELECT ds.doctor.id FROM doctor_secretary ds WHERE ds.secretary.id = :secretaryId AND ds.association = 'ASSOCIATED'")
+    List<UUID> findAllDoctorsBySecretaryId(@Param("secretaryId") UUID secretaryId);
 }

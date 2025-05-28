@@ -47,8 +47,9 @@ public class CreateUserService {
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         UserEntity user = UserMapper.toEntity(userDTO);
         user.setLocation(GeoUtils.createPoint(userDTO.getLatitude(), userDTO.getLongitude()));
+        UserEntity savedUser = saveUserByType(user);
         emailService.generateAndSendConfirmation(user);
-        return saveUserByType(user);
+        return savedUser;
     }
 
     private void validateEmail(String email) {

@@ -1,10 +1,13 @@
 package br.com.meusintoma.modules.calendarHealthPlan.services;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,9 +21,13 @@ import br.com.meusintoma.modules.calendarHealthPlan.dto.CalendarHealthPlanAssoci
 import br.com.meusintoma.modules.calendarHealthPlan.dto.CalendarHealthPlanResponseCreationDTO;
 import br.com.meusintoma.modules.calendarHealthPlan.entity.CalendarHealthPlanEntity;
 import br.com.meusintoma.modules.calendarHealthPlan.repository.CalendarHealthPlanRepository;
+import br.com.meusintoma.modules.doctor.dto.DoctorCalendarResponseDTO;
+import br.com.meusintoma.modules.doctor.mapper.DoctorMapper;
 import br.com.meusintoma.modules.healthPlan.entity.HealthPlanEntity;
 import br.com.meusintoma.modules.healthPlan.services.HealthPlanService;
+import br.com.meusintoma.modules.patient_health_plan.services.PatientHealthPlanService;
 import br.com.meusintoma.utils.common.StatusResult;
+import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
 import jakarta.transaction.Transactional;
 
@@ -32,6 +39,9 @@ public class CalendarHealthPlanService {
 
     @Autowired
     HealthPlanService healthPlanService;
+
+    @Autowired
+    PatientHealthPlanService patientHealthPlanService;
 
     @Autowired
     CalendarHealthPlanRepository calendarHealthPlanRepository;
@@ -99,13 +109,60 @@ public class CalendarHealthPlanService {
                 () -> new NotFoundException("Calendário - Plano"));
     }
 
-    public List<CalendarHealthPlanEntity> getCalendarHealthPlan(UUID doctorId, UUID calendarId){
+    public List<CalendarHealthPlanEntity> getCalendarHealthPlan(UUID doctorId, UUID calendarId) {
         return RepositoryUtils.findOrThrow(calendarHealthPlanRepository.getCalendarByIdAndDoctor(doctorId, calendarId),
                 () -> new NotFoundException("Calendário - Plano"));
     }
 
+    public DoctorCalendarResponseDTO getSpecificalDoctorCalendarWithHealthPlan(UUID doctorId, UUID calendarId) {
+        List<CalendarHealthPlanEntity> calendarHealthPlans = getCalendarHealthPlan(doctorId, calendarId);
+        GenericUtils.checkIsEmptyList(calendarHealthPlans);
+        Map<UUID, String> calendarHealthPlansMap = calendarHealthPlans.stream()
+                .collect(Collectors.toMap(
+                        CalendarHealthPlanEntity::getId,
+                        chp -> chp.getHealthPlan().getName()));
+        CalendarEntity calendar = calendarHealthPlans.get(0).getCalendar();
+        return DoctorMapper.toDoctorSpecificalCalendarResponseDTO(calendar, calendarHealthPlansMap);
+    }
+
+    public List<DoctorCalendarResponseDTO> getDoctorCalendarsFilteredWithPatientHealthPlans(UUID doctorId) {
+        calendarService.checkCalendarPermissions(doctorId, null);
+
+        List<CalendarHealthPlanEntity> calendarsHealthPlans = getAllCalendarsWithHealthPlansByDoctor(doctorId);
+
+        return calendarsHealthPlans.stream()
+                .map(chp -> {
+                    Map<UUID, String> map = new HashMap<>();
+                    map.put(chp.getId(), chp.getHealthPlan().getName());
+                    return DoctorMapper.toDoctorSpecificalCalendarResponseDTO(chp.getCalendar(),
+                            map);
+                })
+                .sorted(Comparator.comparing(DoctorCalendarResponseDTO::getDate)
+                        .thenComparing(DoctorCalendarResponseDTO::getStartAt))
+
+                .collect(Collectors.toList());
+    }
+
+    public List<DoctorCalendarResponseDTO> getDoctorCalendarsFilteredWithPatientHealthPlans(UUID doctorId,
+            UUID patientId) {
+        List<String> patientPlans = patientHealthPlanService.getOnlyHealthPlans(patientId);
+        patientPlans.add("PARTICULAR");
+
+        List<CalendarHealthPlanEntity> calendarsHealthPlans = getAllCalendarsWithHealthPlansByDoctor(doctorId);
+
+        calendarsHealthPlans = calendarsHealthPlans.stream()
+                .filter(chp -> patientPlans.contains(chp.getHealthPlan().getName()))
+                .toList();
+
+        List<DoctorCalendarResponseDTO> calendarsHealthPlansResponse = calendarsHealthPlans.stream()
+                .map(chp -> DoctorMapper.toDoctorCalendarResponseDTO(chp))
+                .toList();
+
+        return calendarsHealthPlansResponse;
+    }
+
     @Transactional
-    public void deleteCalendarHealthPlan(UUID doctorId, UUID calendarId, UUID calendarHealthPlanId){
+    public void deleteCalendarHealthPlan(UUID doctorId, UUID calendarId, UUID calendarHealthPlanId) {
         CalendarEntity calendar = calendarService.findByCalendarIdWithDoctor(calendarId);
         calendarService.checkCalendarPermissions(doctorId, calendar.getDate());
         RepositoryUtils.findOrThrow(calendarHealthPlanRepository.findById(calendarHealthPlanId),
