@@ -14,6 +14,7 @@ import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientEntity;
 import br.com.meusintoma.modules.doctorPatient.enums.DoctorPatientStatus;
 import br.com.meusintoma.modules.doctorPatient.exceptions.DoctorPatientDuplicatedInviteException;
 import br.com.meusintoma.modules.doctorPatient.repository.DoctorPatientRepository;
+import br.com.meusintoma.modules.doctorSecretary.services.DoctorSecretaryService;
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.modules.patient.services.PatientService;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
@@ -36,6 +37,9 @@ public class DoctorPatientInvitationService {
     @Autowired
     DoctorPatientUtilsService doctorPatientUtilsService;
 
+    @Autowired
+    DoctorSecretaryService doctorSecretaryService;
+
     public DoctorPatientEntity findDoctorPatientEntity(UUID inviteRelationshipId) {
         return doctorPatientService.getByIdValidated(inviteRelationshipId);
     }
@@ -49,11 +53,16 @@ public class DoctorPatientInvitationService {
         }
     }
 
-    public DoctorPatientInviteDTO invitePatient(UUID patientId) {
+    public DoctorPatientInviteDTO invitePatient(UUID patientId, UUID doctorId) {
         PatientEntity patient = patientService.findPatient(patientId);
+
         String role = AuthValidatorUtils.getCurrentUserRole();
-        UUID userId = AuthValidatorUtils.getAuthenticatedUserId();
-        UUID doctorId = "SECRETARY".equals(role) ? doctorService.getDoctorIdBySecretaryId(userId) : userId;
+
+        if ("SECRETARY".equals(role)) {
+            UUID secretaryId = AuthValidatorUtils.getAuthenticatedUserId();
+            doctorSecretaryService.checkAssociation(doctorId, secretaryId);
+        }
+
         DoctorEntity doctor = doctorService.findDoctor(doctorId);
         checkRelationshipExistis(doctorId, patientId);
 
@@ -74,7 +83,8 @@ public class DoctorPatientInvitationService {
         return doctorPatientInviteDTO;
     }
 
-    public DoctorPatientInviteDTO disassociateByDoctor(UUID relationshipInviteId, ChangeInviteStatusDTO changeStatusDTO) {
+    public DoctorPatientInviteDTO disassociateByDoctor(UUID relationshipInviteId,
+            ChangeInviteStatusDTO changeStatusDTO) {
         DoctorPatientEntity relationship = doctorPatientService.getByIdValidated(relationshipInviteId);
         doctorPatientUtilsService.validateAcess(relationship);
         DoctorPatientUtilsService.checkDoctorStatus(changeStatusDTO.getStatus());

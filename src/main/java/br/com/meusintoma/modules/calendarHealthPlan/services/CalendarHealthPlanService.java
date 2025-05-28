@@ -52,7 +52,7 @@ public class CalendarHealthPlanService {
                 Set<String> healthPlanNames = calendarEntry.getValue();
 
                 try {
-                    CalendarEntity calendar = calendarService.findByCalendarIdWithDoctorAndSecretary(calendarId);
+                    CalendarEntity calendar = calendarService.findByCalendarIdWithDoctor(calendarId);
 
                     try {
                         calendarService.checkCalendarPermissions(doctorId, calendar.getDate());
@@ -106,7 +106,7 @@ public class CalendarHealthPlanService {
 
     @Transactional
     public void deleteCalendarHealthPlan(UUID doctorId, UUID calendarId, UUID calendarHealthPlanId){
-        CalendarEntity calendar = calendarService.findByCalendarIdWithDoctorAndSecretary(calendarId);
+        CalendarEntity calendar = calendarService.findByCalendarIdWithDoctor(calendarId);
         calendarService.checkCalendarPermissions(doctorId, calendar.getDate());
         RepositoryUtils.findOrThrow(calendarHealthPlanRepository.findById(calendarHealthPlanId),
                 () -> new NotFoundException("Calendário - Plano"));

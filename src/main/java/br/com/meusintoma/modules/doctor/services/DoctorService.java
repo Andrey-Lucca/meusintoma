@@ -40,18 +40,6 @@ public class DoctorService {
                 return doctor;
         }
 
-        public UUID findSecretaryIdByDoctorId(UUID doctorId) {
-                UUID secretaryId = RepositoryUtils.findOrThrow(doctorRepository.findSecretaryByDoctorId(doctorId),
-                                () -> new NotFoundException("Secretária"));
-                return secretaryId;
-        }
-
-        public UUID getDoctorIdBySecretaryId(UUID secretaryId) {
-                UUID secretary = RepositoryUtils.findOrThrow(doctorRepository.findDoctorIdBySecretaryId(secretaryId),
-                                () -> new NotFoundException("Secretaria"));
-                return secretary;
-        }
-
         public DoctorCalendarResponseDTO getSpecificalDoctorCalendarWithHealthPlan(UUID doctorId, UUID calendarId) {
                 List<CalendarHealthPlanEntity> calendarHealthPlans = calendarHealthPlanService
                                 .getCalendarHealthPlan(doctorId, calendarId);

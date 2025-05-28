@@ -27,11 +27,11 @@ public class DoctorPatientInvitationController {
     @Autowired
     DoctorPatientInvitationService doctorPatientInvitationService;
 
-    @PostMapping("/{patientId}")
+    @PostMapping("patient/{patientId}/doctor/{doctorId}")
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
-    public ResponseEntity<Object> invitePatient(@PathVariable UUID patientId) {
+    public ResponseEntity<Object> invitePatient(@PathVariable UUID patientId, @PathVariable UUID doctorId) {
         try {
-            DoctorPatientInviteDTO createdInvite = doctorPatientInvitationService.invitePatient(patientId);
+            DoctorPatientInviteDTO createdInvite = doctorPatientInvitationService.invitePatient(patientId, doctorId);
             return ResponseEntity.status(201).body(createdInvite);
         } catch (NotFoundException e) {
             throw e;

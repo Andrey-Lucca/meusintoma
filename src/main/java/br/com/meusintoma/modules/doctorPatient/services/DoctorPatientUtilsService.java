@@ -12,6 +12,7 @@ import br.com.meusintoma.modules.doctor.services.DoctorService;
 import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientEntity;
 import br.com.meusintoma.modules.doctorPatient.enums.DoctorPatientStatus;
 import br.com.meusintoma.modules.doctorPatient.exceptions.DoctorPatientNotValidStatusException;
+import br.com.meusintoma.modules.doctorSecretary.services.DoctorSecretaryService;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
 
 @Service
@@ -22,6 +23,9 @@ public class DoctorPatientUtilsService {
 
     @Autowired
     DoctorPatientService doctorPatientService;
+
+    @Autowired
+    DoctorSecretaryService doctorSecretaryService;
 
     public static void checkPatientStatus(DoctorPatientStatus status) {
         List<DoctorPatientStatus> statuses = new ArrayList<>(
@@ -50,12 +54,9 @@ public class DoctorPatientUtilsService {
         UUID patientId = relationship.getPatient().getId();
         UUID doctorId = relationship.getDoctor().getId();
 
+        List<UUID> secretaryIds = doctorSecretaryService.getAllSecretaryIdsByDoctorId(doctorId);
         List<UUID> allowedIds = new ArrayList<>(List.of(patientId, doctorId));
-
-        var secretary = relationship.getDoctor().getSecretary();
-        if (secretary != null) {
-            allowedIds.add(secretary.getId());
-        }
+        allowedIds.addAll(secretaryIds);
 
         return allowedIds;
     }

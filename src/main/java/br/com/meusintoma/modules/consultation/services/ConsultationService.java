@@ -1,7 +1,5 @@
 package br.com.meusintoma.modules.consultation.services;
 
-import static br.com.meusintoma.utils.helpers.RepositoryUtils.findOrThrow;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -16,7 +14,6 @@ import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
-import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
 import br.com.meusintoma.modules.calendar.repository.CalendarRepository;
 import br.com.meusintoma.modules.calendar.services.CalendarService;
@@ -76,9 +73,7 @@ public class ConsultationService {
 
         public ConsultationResponseDTO createConsultation(UUID calendarId, String healthPlan) {
                 UUID patientId = AuthValidatorUtils.getAuthenticatedUserId();
-                CalendarEntity calendar = findOrThrow(
-                                calendarRepository.findByIdWithDoctorAndSecretary(calendarId),
-                                () -> new CalendarNotFoundException("Horário Indisponível"));
+                CalendarEntity calendar = calendarService.findByCalendarIdWithDoctor(calendarId);
                 List<CalendarHealthPlanEntity> linkedPlansList = calendarHealthPlanRepository
                                 .findLinkedHealthPlansByCalendarId(calendarId);
 
@@ -134,7 +129,7 @@ public class ConsultationService {
                 ConsultationEntity consultation = findConsultationWithCalendar(consultationId);
 
                 CalendarEntity calendar = calendarService
-                                .findByCalendarIdWithDoctorAndSecretary(rescheduleDTO.getNewCalendarId());
+                                .findByCalendarIdWithDoctor(rescheduleDTO.getNewCalendarId());
 
                 consultationUtilsService.checkStatusAndPermissions(consultation);
                 consultationUtilsService.changeCalendarStatus(consultation, CalendarStatus.AVAILABLE);
@@ -152,7 +147,8 @@ public class ConsultationService {
 
                 LocalDate consultationDate = consultation.getCalendarSlot().getDate();
                 LocalTime consultationTime = consultation.getCalendarSlot().getStartTime();
-                boolean isDateAndHourWithInPeriod = consultationUtilsService.dateAndHourAvaliable(consultationDate, consultationTime);
+                boolean isDateAndHourWithInPeriod = consultationUtilsService.dateAndHourAvaliable(consultationDate,
+                                consultationTime);
 
                 if (!isDateAndHourWithInPeriod && status != ConsultationStatus.CONFIRMED) {
                         throw new UnalterableException("Consulta");

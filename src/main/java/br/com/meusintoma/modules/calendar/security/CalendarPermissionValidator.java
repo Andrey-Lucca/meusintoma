@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
 import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
 import br.com.meusintoma.modules.doctor.repository.DoctorRepository;
-import br.com.meusintoma.modules.secretary.repository.SecretaryRepository;
+import br.com.meusintoma.modules.doctorSecretary.services.DoctorSecretaryService;
 
 @Component
 public class CalendarPermissionValidator {
@@ -18,7 +18,7 @@ public class CalendarPermissionValidator {
     DoctorRepository doctorRepository;
 
     @Autowired
-    SecretaryRepository secretaryRepository;
+    DoctorSecretaryService doctorSecretaryService;
 
     public void validateCalendarOperationPermission(UUID authenticatedUserId, String authenticatedUserRole,
             UUID targetDoctorId) {
@@ -27,19 +27,16 @@ public class CalendarPermissionValidator {
                 throw new CustomAccessDeniedException("Você não tem permissão para alterar a agenda desse médico");
             }
         } else if (authenticatedUserRole.equals("SECRETARY")) {
-            boolean isAssociated = secretaryRepository.existsByIdAndDoctorsId(authenticatedUserId,
-                    targetDoctorId);
-            if (!isAssociated) {
-                throw new CustomAccessDeniedException("Você não está associada a esse médico");
-            }
+            doctorSecretaryService.checkAssociation(targetDoctorId, authenticatedUserId);
+
         } else {
             throw new CustomAccessDeniedException("Você não pode realizar esta operação");
         }
     }
 
-    public void validateCalendarDatePermission(LocalDate requestDateDTO){
+    public void validateCalendarDatePermission(LocalDate requestDateDTO) {
         LocalDate currentDate = LocalDate.now();
-        if(requestDateDTO.isBefore(currentDate)){
+        if (requestDateDTO.isBefore(currentDate)) {
             throw new InvalidDateException("A data fornecida tem que ser igual ou maior do que a data atual");
         }
     }

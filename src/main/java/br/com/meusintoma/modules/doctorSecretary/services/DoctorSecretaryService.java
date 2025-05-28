@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.AlreadyExistsException;
+import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
 import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import br.com.meusintoma.modules.doctor.services.DoctorService;
@@ -89,6 +90,13 @@ public class DoctorSecretaryService {
         return doctorSecretaryRelationships.stream().map(DoctorSecretaryMapper::toDoctorSecretaryResponse).toList();
     }
 
+    public List<UUID> getAllSecretaryIdsByDoctorId(UUID doctorId) {
+        List<DoctorSecretaryEntity> doctorSecretaryRelationships = doctorSecretaryRepository
+                .findAllRelationshipByDoctorIdWithSecretary(doctorId);
+
+        return doctorSecretaryRelationships.stream().map(ds -> ds.getSecretary().getId()).toList();
+    }
+
     public List<DoctorSecretaryResponseDTO> getAssociatedDoctorSecretaryBySecretaryId(UUID secretaryId) {
         List<DoctorSecretaryEntity> doctorSecretaryRelationships = doctorSecretaryRepository
                 .findAllRelationshipBySecretaryId(secretaryId);
@@ -109,7 +117,14 @@ public class DoctorSecretaryService {
 
     }
 
-    private void checkAlreadyAssociated(UUID doctorId, UUID secretaryId) {
+    public void checkAssociation(UUID doctorId, UUID secretaryId) {
+        boolean relationshipExists = doctorSecretaryRepository.alreadyExistsRelationship(doctorId, secretaryId);
+        if (!relationshipExists) {
+            throw new CustomAccessDeniedException("Você não está associada e esse médico");
+        }
+    }
+
+    public void checkAlreadyAssociated(UUID doctorId, UUID secretaryId) {
         boolean relationshipExists = doctorSecretaryRepository.alreadyExistsRelationship(doctorId, secretaryId);
         if (relationshipExists) {
             throw new AlreadyExistsException("O relacionamento entre esse doutor e secretária");

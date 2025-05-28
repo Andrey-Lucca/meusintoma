@@ -23,6 +23,7 @@ import br.com.meusintoma.modules.consultation.enums.ConsultationStatus;
 import br.com.meusintoma.modules.consultation.exceptions.AlreadyHaveConsultationException;
 import br.com.meusintoma.modules.consultation.mapper.ConsultationMapper;
 import br.com.meusintoma.modules.consultation.repository.ConsultationRepository;
+import br.com.meusintoma.modules.doctorSecretary.services.DoctorSecretaryService;
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
 import br.com.meusintoma.utils.helpers.SystemClockUtils;
@@ -35,6 +36,9 @@ public class ConsultationUtilsService {
 
     @Autowired
     ConsultationRepository consultationRepository;
+
+    @Autowired
+    DoctorSecretaryService doctorSecretaryService;
 
     private List<ConsultationStatus> statuses = new ArrayList<>(List.of(
             ConsultationStatus.PENDING,
@@ -65,7 +69,9 @@ public class ConsultationUtilsService {
         List<UUID> allowedIds = new ArrayList<>();
         returnUserId(consultation.getDoctorId()).ifPresent(allowedIds::add);
         returnUserId(consultation.getPatient().getId()).ifPresent(allowedIds::add);
-        returnUserId(consultation.getSecretaryId()).ifPresent(allowedIds::add);
+
+        List<UUID> secretaryIds = doctorSecretaryService.getAllSecretaryIdsByDoctorId(consultation.getDoctorId());
+        allowedIds.addAll(secretaryIds);
 
         if (!allowedIds.contains(userId)) {
             throw new CustomAccessDeniedException("Você não pode realizar essa operação");
@@ -94,9 +100,6 @@ public class ConsultationUtilsService {
         ConsultationEntity consultation = ConsultationEntity.builder().calendarSlot(calendar)
                 .status(ConsultationStatus.PENDING).patient(patient)
                 .doctorId(calendar.getDoctor().getId())
-                .secretaryId(calendar.getDoctor().getSecretary() != null
-                        ? calendar.getDoctor().getSecretary().getId()
-                        : null)
                 .canceledBy(null)
                 .snapshot(snapshot)
                 .healthPlan(healthPlan)

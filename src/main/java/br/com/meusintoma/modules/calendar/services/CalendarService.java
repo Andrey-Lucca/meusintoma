@@ -38,7 +38,6 @@ public class CalendarService {
     @Autowired
     CalendarPermissionService calendarPermissionService;
 
-
     public boolean doctorAlreadyHaveCalendarSlot(UUID doctorId, LocalDate targetDate, LocalTime startedAt) {
         return calendarRepository.checkDoctorCalendarSlot(doctorId, targetDate, startedAt);
     }
@@ -49,9 +48,9 @@ public class CalendarService {
         }
     }
 
-    public CalendarEntity findByCalendarIdWithDoctorAndSecretary(UUID calendarId) {
+    public CalendarEntity findByCalendarIdWithDoctor(UUID calendarId) {
         return RepositoryUtils.findOrThrow(
-                calendarRepository.findByIdWithDoctorAndSecretary(calendarId),
+                calendarRepository.findByIdWithDoctor(calendarId),
                 () -> new CalendarNotFoundException("Horário Indisponível"));
     }
 
