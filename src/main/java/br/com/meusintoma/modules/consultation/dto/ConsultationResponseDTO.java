@@ -2,6 +2,7 @@ package br.com.meusintoma.modules.consultation.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.UUID;
 
 import br.com.meusintoma.modules.consultation.enums.ConsultationStatus;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class ConsultationResponseDTO {
+    private UUID id;
     private String doctor;
     private String patient; 
     private ConsultationStatus status;

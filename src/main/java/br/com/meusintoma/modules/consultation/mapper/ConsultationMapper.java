@@ -32,6 +32,7 @@ public class ConsultationMapper {
                                 : consultation.getCalendarSlot().getDoctor().getName();
 
                 ConsultationResponseDTO responseDTO = ConsultationResponseDTO.builder()
+                                .id(consultation.getId())
                                 .date(date)
                                 .startedAt(startedAt)
                                 .endAt(endAt)

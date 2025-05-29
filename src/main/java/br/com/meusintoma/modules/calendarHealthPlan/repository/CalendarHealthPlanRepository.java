@@ -1,5 +1,6 @@
 package br.com.meusintoma.modules.calendarHealthPlan.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,8 +20,8 @@ public interface CalendarHealthPlanRepository extends JpaRepository<CalendarHeal
         Optional<List<CalendarHealthPlanEntity>> getCalendarByIdAndDoctor(@Param("doctorId") UUID doctorId,
                         @Param("calendarId") UUID calendarId);
 
-        @Query("SELECT chp FROM calendar_health_plan chp JOIN FETCH calendar c JOIN FETCH c.doctor d JOIN FETCH healthPlan hp WHERE d.id = :doctorId AND c.calendarStatus = 'AVAILABLE'")
-        Optional<List<CalendarHealthPlanEntity>> getAllAvaliableCalendarsByDoctorId(@Param("doctorId") UUID doctorId);
+        @Query("SELECT chp FROM calendar_health_plan chp JOIN FETCH calendar c JOIN FETCH c.doctor d JOIN FETCH healthPlan hp WHERE d.id = :doctorId AND c.calendarStatus = 'AVAILABLE' AND c.date >= :currentDate")
+        Optional<List<CalendarHealthPlanEntity>> getAllAvaliableCalendarsByDoctorId(@Param("doctorId") UUID doctorId, @Param("currentDate") LocalDate currentDate);
 
         @Query("""
                             SELECT chp FROM calendar_health_plan chp

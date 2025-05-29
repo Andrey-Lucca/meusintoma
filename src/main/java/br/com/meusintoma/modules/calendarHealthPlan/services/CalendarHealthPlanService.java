@@ -29,6 +29,7 @@ import br.com.meusintoma.modules.patient_health_plan.services.PatientHealthPlanS
 import br.com.meusintoma.utils.common.StatusResult;
 import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
+import br.com.meusintoma.utils.helpers.SystemClockUtils;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -105,8 +106,12 @@ public class CalendarHealthPlanService {
     }
 
     public List<CalendarHealthPlanEntity> getAllCalendarsWithHealthPlansByDoctor(UUID doctorId) {
-        return RepositoryUtils.findOrThrow(calendarHealthPlanRepository.getAllAvaliableCalendarsByDoctorId(doctorId),
+        List<CalendarHealthPlanEntity> calendarHealthPlans = RepositoryUtils.findOrThrow(
+                calendarHealthPlanRepository.getAllAvaliableCalendarsByDoctorId(doctorId,
+                        SystemClockUtils.getCurrentDate()),
                 () -> new NotFoundException("Calendário - Plano"));
+        GenericUtils.checkIsEmptyList(calendarHealthPlans);
+        return calendarHealthPlans;
     }
 
     public List<CalendarHealthPlanEntity> getCalendarHealthPlan(UUID doctorId, UUID calendarId) {
@@ -154,8 +159,11 @@ public class CalendarHealthPlanService {
                 .filter(chp -> patientPlans.contains(chp.getHealthPlan().getName()))
                 .toList();
 
-        List<DoctorCalendarResponseDTO> calendarsHealthPlansResponse = calendarsHealthPlans.stream()
-                .map(chp -> DoctorMapper.toDoctorCalendarResponseDTO(chp))
+        Map<UUID, List<CalendarHealthPlanEntity>> groupedByCalendar = calendarsHealthPlans.stream()
+                .collect(Collectors.groupingBy(chp -> chp.getCalendar().getId()));
+
+        List<DoctorCalendarResponseDTO> calendarsHealthPlansResponse = groupedByCalendar.values().stream()
+                .map(group -> DoctorMapper.toDoctorCalendarResponseDTO(group.get(0)))
                 .toList();
 
         return calendarsHealthPlansResponse;
