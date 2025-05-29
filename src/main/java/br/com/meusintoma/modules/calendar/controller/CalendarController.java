@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,16 +25,17 @@ import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.NoDoctorCalendarException;
 import br.com.meusintoma.modules.calendar.services.CalendarPermissionService;
 import br.com.meusintoma.modules.calendar.services.CalendarService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/calendar")
+@RequiredArgsConstructor
+
 public class CalendarController {
 
-    @Autowired
-    CalendarService calendarService;
+    private final CalendarService calendarService;
 
-    @Autowired
-    CalendarPermissionService calendarPermissionService;
+    private final CalendarPermissionService calendarPermissionService;
 
     @GetMapping("/doctor/{doctorId}")
     public ResponseEntity<Object> getCalendarByDoctor(@PathVariable UUID doctorId) {
@@ -57,7 +57,7 @@ public class CalendarController {
             @RequestBody CalendarConsultationRequestDTO calendarConsultationRequestDTO) {
         try {
             List<CalendarConsultationResponseDTO> calendars = calendarService
-                    .getCalendarConsultation( calendarConsultationRequestDTO);
+                    .getCalendarConsultation(calendarConsultationRequestDTO);
             return ResponseEntity.ok().body(calendars);
         } catch (NotFoundException e) {
             throw e;

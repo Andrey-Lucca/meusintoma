@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
@@ -23,27 +22,23 @@ import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.modules.patient.services.PatientService;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
 import br.com.meusintoma.utils.helpers.GenericUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class DoctorPatientInvitationService {
 
-    @Autowired
-    PatientService patientService;
+    private final PatientService patientService;
 
-    @Autowired
-    DoctorService doctorService;
+    private final DoctorService doctorService;
 
-    @Autowired
-    DoctorPatientRepository doctorPatientRepository;
+    private final DoctorPatientRepository doctorPatientRepository;
 
-    @Autowired
-    DoctorPatientService doctorPatientService;
+    private final DoctorPatientService doctorPatientService;
 
-    @Autowired
-    DoctorPatientUtilsService doctorPatientUtilsService;
+    private final DoctorPatientUtilsService doctorPatientUtilsService;
 
-    @Autowired
-    DoctorSecretaryService doctorSecretaryService;
+    private final DoctorSecretaryService doctorSecretaryService;
 
     public DoctorPatientEntity findDoctorPatientEntity(UUID inviteRelationshipId) {
         return doctorPatientService.getByIdValidated(inviteRelationshipId);

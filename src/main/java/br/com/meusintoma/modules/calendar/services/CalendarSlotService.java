@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.modules.calendar.dto.CalendarResultDTO;
@@ -21,21 +20,19 @@ import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import br.com.meusintoma.modules.doctor.services.DoctorService;
 import br.com.meusintoma.utils.common.StatusResult;
 import br.com.meusintoma.utils.helpers.SystemClockUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class CalendarSlotService {
+    
+    private final CalendarRepository calendarRepository;
 
-    @Autowired
-    CalendarRepository calendarRepository;
+    private final CalendarService calendarService;
 
-    @Autowired
-    CalendarService calendarService;
+    private final CalendarPermissionService calendarPermissionService;
 
-    @Autowired
-    CalendarPermissionService calendarPermissionService;
-
-    @Autowired
-    DoctorService doctorService;
+    private final DoctorService doctorService;
 
     public List<CalendarResultDTO> generateDailySlots(GenerateDailySlotsRequestDTO request) {
 

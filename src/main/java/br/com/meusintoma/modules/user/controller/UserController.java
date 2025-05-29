@@ -1,6 +1,5 @@
 package br.com.meusintoma.modules.user.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,13 +10,15 @@ import br.com.meusintoma.modules.user.dto.CreateUserDTO;
 import br.com.meusintoma.modules.user.entity.UserEntity;
 import br.com.meusintoma.modules.user.exceptions.UserAlreadyRegistered;
 import br.com.meusintoma.modules.user.services.CreateUserService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
+
 public class UserController {
 
-    @Autowired
-    private CreateUserService createUserService;
+    private final CreateUserService createUserService;
 
     @PostMapping("/create")
     public ResponseEntity<Object> create(@RequestBody CreateUserDTO userDTO) {

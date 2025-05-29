@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.AlreadyExistsException;
@@ -25,18 +24,17 @@ import br.com.meusintoma.utils.common.AssociationStatus;
 import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
 import br.com.meusintoma.utils.helpers.SystemClockUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class DoctorSecretaryService {
 
-    @Autowired
-    DoctorService doctorService;
+    private final DoctorService doctorService;
 
-    @Autowired
-    SecretaryService secretaryService;
+    private final SecretaryService secretaryService;
 
-    @Autowired
-    DoctorSecretaryRepository doctorSecretaryRepository;
+    private final DoctorSecretaryRepository doctorSecretaryRepository;
 
     public DoctorSecretaryResponseDTO association(UUID doctorId, UUID secretaryId) {
         checkAssociationRequestPermission(doctorId, secretaryId);

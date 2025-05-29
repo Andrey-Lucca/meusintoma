@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.BadRequestException;
@@ -24,18 +23,20 @@ import br.com.meusintoma.security.utils.AuthValidatorUtils;
 import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class ChronicDiseaseService {
 
-    @Autowired
-    DiseaseTypeRepository diseaseTypeRepository;
+    
+    private final DiseaseTypeRepository diseaseTypeRepository;
 
-    @Autowired
-    PatientService patientService;
+    
+    private final PatientService patientService;
 
-    @Autowired
-    ChronicDiseaseRepository chronicDiseaseRepository;
+    
+    private final ChronicDiseaseRepository chronicDiseaseRepository;
 
     private Set<ChronicDiseaseEntity> getChronicDisease(PatientEntity patient, ChronicDiseaseRequestDTO dto) {
         Set<ChronicDiseaseEntity> chronicDiseases = dto.getChronicDiseases().stream().map(diseaseInput -> {

@@ -1,6 +1,5 @@
 package br.com.meusintoma.modules.user.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,13 +11,14 @@ import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedExce
 import br.com.meusintoma.modules.user.dto.AuthUserRequestDTO;
 import br.com.meusintoma.modules.user.exceptions.UserAuthException;
 import br.com.meusintoma.modules.user.services.AuthUserService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class AuthUserController {
 
-    @Autowired
-    private AuthUserService authUserService;
+    private final AuthUserService authUserService;
 
     @PostMapping("/auth")
     public ResponseEntity<Object> authenticate(@RequestBody AuthUserRequestDTO authUserRequestDTO) {

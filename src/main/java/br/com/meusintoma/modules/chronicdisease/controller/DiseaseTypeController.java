@@ -1,6 +1,5 @@
 package br.com.meusintoma.modules.chronicdisease.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,13 +11,14 @@ import br.com.meusintoma.exceptions.globalCustomException.ForbiddenException;
 import br.com.meusintoma.modules.chronicdisease.dto.DiseaseTypeRequestDTO;
 import br.com.meusintoma.modules.chronicdisease.dto.DiseaseTypeResponseDTO;
 import br.com.meusintoma.modules.chronicdisease.services.DiseaseTypeService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/disease-type")
+@RequiredArgsConstructor
 public class DiseaseTypeController {
 
-    @Autowired
-    DiseaseTypeService diseaseTypeService;
+    private final DiseaseTypeService diseaseTypeService;
 
     @PostMapping
     @PreAuthorize("hasRole('PATIENT')")

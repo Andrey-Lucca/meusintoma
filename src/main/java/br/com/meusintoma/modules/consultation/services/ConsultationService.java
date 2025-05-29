@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
@@ -15,7 +14,6 @@ import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
 import br.com.meusintoma.modules.calendar.entity.CalendarEntity;
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
-import br.com.meusintoma.modules.calendar.repository.CalendarRepository;
 import br.com.meusintoma.modules.calendar.services.CalendarService;
 import br.com.meusintoma.modules.calendarHealthPlan.entity.CalendarHealthPlanEntity;
 import br.com.meusintoma.modules.calendarHealthPlan.repository.CalendarHealthPlanRepository;
@@ -29,38 +27,27 @@ import br.com.meusintoma.modules.consultation.mapper.ConsultationMapper;
 import br.com.meusintoma.modules.consultation.repository.ConsultationRepository;
 import br.com.meusintoma.modules.doctorSecretary.services.DoctorSecretaryService;
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
-import br.com.meusintoma.modules.patient.repository.PatientRepository;
 import br.com.meusintoma.modules.patient.services.PatientService;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
 import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class ConsultationService {
 
-        @Autowired
-        ConsultationRepository consultationRepository;
+        private final ConsultationRepository consultationRepository;
 
-        @Autowired
-        CalendarRepository calendarRepository;
+        private final PatientService patientService;
 
-        @Autowired
-        PatientRepository patientRepository;
+        private final CalendarService calendarService;
 
-        @Autowired
-        PatientService patientService;
+        private final ConsultationUtilsService consultationUtilsService;
 
-        @Autowired
-        CalendarService calendarService;
+        private final CalendarHealthPlanRepository calendarHealthPlanRepository;
 
-        @Autowired
-        ConsultationUtilsService consultationUtilsService;
-
-        @Autowired
-        CalendarHealthPlanRepository calendarHealthPlanRepository;
-
-        @Autowired
-        DoctorSecretaryService doctorSecretaryService;
+        private final DoctorSecretaryService doctorSecretaryService;
 
         public ConsultationEntity findConsultation(UUID consultationId) {
                 ConsultationEntity consultation = RepositoryUtils.findOrThrow(

@@ -51,7 +51,7 @@ public class CalendarServiceUtils {
         if (mod == 0)
             return time.truncatedTo(ChronoUnit.MINUTES);
 
-        return time.plusMinutes(slotMinutes - mod).truncatedTo(ChronoUnit.MINUTES);
+        return time.plusMinutes((long) slotMinutes - mod).truncatedTo(ChronoUnit.MINUTES);
     }
 
 }

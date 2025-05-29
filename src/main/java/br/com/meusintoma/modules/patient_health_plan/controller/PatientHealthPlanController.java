@@ -3,7 +3,6 @@ package br.com.meusintoma.modules.patient_health_plan.controller;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,13 +20,14 @@ import br.com.meusintoma.modules.patient_health_plan.dto.PatientHealthPlanAssoci
 import br.com.meusintoma.modules.patient_health_plan.dto.PatientHealthPlanRequestDTO;
 import br.com.meusintoma.modules.patient_health_plan.dto.PatientHealthPlanResponseDTO;
 import br.com.meusintoma.modules.patient_health_plan.services.PatientHealthPlanService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/patient-healthplan")
+@RequiredArgsConstructor
 public class PatientHealthPlanController {
 
-    @Autowired
-    PatientHealthPlanService patientHealthPlanService;
+    private final PatientHealthPlanService patientHealthPlanService;
 
     @PostMapping
     @PreAuthorize("hasRole('PATIENT')")

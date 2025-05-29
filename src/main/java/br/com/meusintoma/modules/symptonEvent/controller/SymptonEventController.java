@@ -2,7 +2,6 @@ package br.com.meusintoma.modules.symptonEvent.controller;
 
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,16 +22,17 @@ import br.com.meusintoma.modules.symptonEvent.services.SymptonService;
 import br.com.meusintoma.security.utils.AuthUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/symptoms")
+@RequiredArgsConstructor
+
 public class SymptonEventController {
 
-    @Autowired
-    SymptonService symptonService;
+    private final SymptonService symptonService;
 
-    @Autowired
-    PatientRepository patientRepository;
+    private final PatientRepository patientRepository;
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('PATIENT')")

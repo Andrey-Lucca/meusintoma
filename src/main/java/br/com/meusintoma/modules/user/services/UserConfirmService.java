@@ -1,20 +1,19 @@
 package br.com.meusintoma.modules.user.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.modules.user.entity.UserEntity;
 import br.com.meusintoma.modules.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class UserConfirmService {
 
-    @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     
     public void confirmUser(UserEntity user){
         user.setEnabled(true);

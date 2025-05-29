@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
@@ -31,21 +30,20 @@ import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
 import br.com.meusintoma.utils.helpers.SystemClockUtils;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
+
 public class CalendarHealthPlanService {
 
-    @Autowired
-    CalendarService calendarService;
+    private final CalendarService calendarService;
 
-    @Autowired
-    HealthPlanService healthPlanService;
+    private final HealthPlanService healthPlanService;
 
-    @Autowired
-    PatientHealthPlanService patientHealthPlanService;
+    private final PatientHealthPlanService patientHealthPlanService;
 
-    @Autowired
-    CalendarHealthPlanRepository calendarHealthPlanRepository;
+    private final CalendarHealthPlanRepository calendarHealthPlanRepository;
 
     public List<CalendarHealthPlanResponseCreationDTO> associateHealthPlanToCalendar(
             CalendarHealthPlanAssociateRequestDTO calendarHealthPlanDTO) {

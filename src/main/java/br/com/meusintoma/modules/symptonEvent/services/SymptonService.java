@@ -3,7 +3,6 @@ package br.com.meusintoma.modules.symptonEvent.services;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.modules.symptonEvent.dto.SymptonEventResponseDTO;
@@ -11,12 +10,13 @@ import br.com.meusintoma.modules.symptonEvent.entity.SymptonEventEntity;
 import br.com.meusintoma.modules.symptonEvent.mapper.SymptonEventMapper;
 import br.com.meusintoma.modules.symptonEvent.repository.SymptonEventRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class SymptonService {
 
-    @Autowired
-    SymptonEventRepository symptonEventRepository;
+    private final SymptonEventRepository symptonEventRepository;
 
     public SymptonEventResponseDTO createSymptomEvent(SymptonEventEntity symptonEvent) {
         var savedSymptom = this.symptonEventRepository.save(symptonEvent);

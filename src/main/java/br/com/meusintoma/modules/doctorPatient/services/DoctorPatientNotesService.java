@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
@@ -22,24 +21,21 @@ import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientNoteEntity;
 import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientNoteItemEntity;
 import br.com.meusintoma.modules.doctorPatient.repository.DoctorPatientNoteRepository;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class DoctorPatientNotesService {
 
-        @Autowired
-        ConsultationService consultationService;
+        private final ConsultationService consultationService;
 
-        @Autowired
-        DoctorPatientService doctorPatientService;
+        private final DoctorPatientService doctorPatientService;
 
-        @Autowired
-        ConsultationUtilsService consultationUtilsService;
+        private final ConsultationUtilsService consultationUtilsService;
 
-        @Autowired
-        DoctorPatientNoteRepository doctorPatientNoteRepository;
+        private final DoctorPatientNoteRepository doctorPatientNoteRepository;
 
-        @Autowired
-        DoctorPatientUtilsService doctorPatientUtilsService;
+        private final DoctorPatientUtilsService doctorPatientUtilsService;
 
 
         final List<ConsultationStatus> statuses = new ArrayList<>(

@@ -2,7 +2,6 @@ package br.com.meusintoma.modules.chronicdisease.services;
 
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.ForbiddenException;
@@ -13,12 +12,13 @@ import br.com.meusintoma.modules.chronicdisease.enums.ApprovalStatus;
 import br.com.meusintoma.modules.chronicdisease.mapper.DiseaseTypeMapper;
 import br.com.meusintoma.modules.chronicdisease.repository.DiseaseTypeRepository;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class DiseaseTypeService {
 
-    @Autowired
-    DiseaseTypeRepository diseaseTypeRepository;
+    private final DiseaseTypeRepository diseaseTypeRepository;
 
     private void checkPatientDiseaseRequestsCount(UUID patientId) {
         boolean isMoreThanTenRequest = diseaseTypeRepository.isPatientMoreThanTenRequestPending(patientId, ApprovalStatus.PENDING);

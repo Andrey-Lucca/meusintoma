@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.locationtech.jts.geom.Point;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.BadRequestException;
@@ -16,12 +15,14 @@ import br.com.meusintoma.modules.doctor.repository.DoctorRepository;
 import br.com.meusintoma.modules.user.dto.LocationDTO;
 import br.com.meusintoma.utils.helpers.GeoUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
+
 public class DoctorLocationService {
 
-    @Autowired
-    DoctorRepository doctorRepository;
+    private final DoctorRepository doctorRepository;
 
     public List<DoctorResponseDTO> getNearbyDoctors(LocationDTO patientLocation, Double distance,
             String specialization) {

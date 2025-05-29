@@ -1,6 +1,5 @@
 package br.com.meusintoma.modules.email.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,16 +17,16 @@ import br.com.meusintoma.modules.email.exception.InvalidTokenException;
 import br.com.meusintoma.modules.email.exception.TokenGenerationException;
 import br.com.meusintoma.modules.email.services.EmailService;
 import br.com.meusintoma.modules.email.services.ResetPasswordService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/email")
+@RequiredArgsConstructor
 public class EmailController {
 
-    @Autowired
-    EmailService emailService;
+    private final EmailService emailService;
 
-    @Autowired
-    ResetPasswordService resetPasswordService;
+    private final ResetPasswordService resetPasswordService;
 
     @GetMapping("/confirm")
     public ResponseEntity<Object> confirmEmail(@RequestParam String token) {

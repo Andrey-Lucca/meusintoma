@@ -4,28 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
-import br.com.meusintoma.modules.doctor.services.DoctorService;
 import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientEntity;
 import br.com.meusintoma.modules.doctorPatient.enums.DoctorPatientStatus;
 import br.com.meusintoma.modules.doctorPatient.exceptions.DoctorPatientNotValidStatusException;
 import br.com.meusintoma.modules.doctorSecretary.services.DoctorSecretaryService;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class DoctorPatientUtilsService {
 
-    @Autowired
-    DoctorService doctorService;
-
-    @Autowired
-    DoctorPatientService doctorPatientService;
-
-    @Autowired
-    DoctorSecretaryService doctorSecretaryService;
+    private final DoctorSecretaryService doctorSecretaryService;
 
     public static void checkPatientStatus(DoctorPatientStatus status) {
         List<DoctorPatientStatus> statuses = new ArrayList<>(

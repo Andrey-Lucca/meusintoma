@@ -2,7 +2,6 @@ package br.com.meusintoma.modules.calendar.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,13 +16,14 @@ import br.com.meusintoma.modules.calendar.dto.CalendarResultDTO;
 import br.com.meusintoma.modules.calendar.dto.CalendarWeeklySlotsGenerationDTO;
 import br.com.meusintoma.modules.calendar.dto.GenerateDailySlotsRequestDTO;
 import br.com.meusintoma.modules.calendar.services.CalendarSlotService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/calendar/bulk")
+@RequiredArgsConstructor
 public class CalendarBulkController {
 
-        @Autowired
-        private CalendarSlotService calendarSlotService;
+        private final CalendarSlotService calendarSlotService;
 
         @PostMapping("/daily-slots")
         @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")

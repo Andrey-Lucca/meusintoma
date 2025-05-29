@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
@@ -28,15 +27,15 @@ import br.com.meusintoma.modules.calendar.repository.CalendarRepository;
 import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
 import br.com.meusintoma.utils.helpers.SystemClockUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class CalendarService {
 
-    @Autowired
-    CalendarRepository calendarRepository;
+    private final CalendarRepository calendarRepository;
 
-    @Autowired
-    CalendarPermissionService calendarPermissionService;
+    private final CalendarPermissionService calendarPermissionService;
 
     public boolean doctorAlreadyHaveCalendarSlot(UUID doctorId, LocalDate targetDate, LocalTime startedAt) {
         return calendarRepository.checkDoctorCalendarSlot(doctorId, targetDate, startedAt);

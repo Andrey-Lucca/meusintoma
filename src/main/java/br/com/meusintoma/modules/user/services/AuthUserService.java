@@ -6,7 +6,6 @@ import java.util.Arrays;
 
 import javax.naming.AuthenticationException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,17 +20,17 @@ import br.com.meusintoma.modules.user.entity.UserEntity;
 import br.com.meusintoma.modules.user.exceptions.UserAuthException;
 import br.com.meusintoma.modules.user.repository.UserRepository;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class AuthUserService {
     @Value("${security.token.secret.user}")
     private String secretKey;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     private void checkConfirmationEmail(UserEntity user) {
         if (!user.isEnabled()) {

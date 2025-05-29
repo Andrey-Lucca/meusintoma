@@ -3,19 +3,20 @@ package br.com.meusintoma.modules.calendar.security;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
 import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
 import br.com.meusintoma.modules.doctorSecretary.services.DoctorSecretaryService;
 import br.com.meusintoma.utils.helpers.SystemClockUtils;
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
+
 public class CalendarPermissionValidator {
 
-    @Autowired
-    DoctorSecretaryService doctorSecretaryService;
+    private final DoctorSecretaryService doctorSecretaryService;
 
     public void validateCalendarOperationPermission(UUID authenticatedUserId, String authenticatedUserRole,
             UUID targetDoctorId) {

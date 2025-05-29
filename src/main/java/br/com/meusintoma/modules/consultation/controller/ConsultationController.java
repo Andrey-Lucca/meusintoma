@@ -3,7 +3,6 @@ package br.com.meusintoma.modules.consultation.controller;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,16 +31,17 @@ import br.com.meusintoma.modules.consultation.exceptions.AlreadyHaveConsultation
 import br.com.meusintoma.modules.consultation.services.ConsultationRelationshipService;
 import br.com.meusintoma.modules.consultation.services.ConsultationService;
 import br.com.meusintoma.modules.patient.exceptions.PatientNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/consultation")
+@RequiredArgsConstructor
+
 public class ConsultationController {
 
-    @Autowired
-    private ConsultationService consultationService;
+    private final ConsultationService consultationService;
 
-    @Autowired
-    private ConsultationRelationshipService consultationRelationshipService;
+    private final ConsultationRelationshipService consultationRelationshipService;
 
     @PostMapping
     @PreAuthorize("hasRole('PATIENT')")

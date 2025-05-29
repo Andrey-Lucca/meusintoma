@@ -1,6 +1,5 @@
 package br.com.meusintoma.modules.user.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,27 +17,23 @@ import br.com.meusintoma.modules.user.mapper.UserMapper;
 import br.com.meusintoma.modules.user.repository.UserRepository;
 import br.com.meusintoma.utils.helpers.GeoUtils;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class CreateUserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private DoctorRepository doctorRepository;
+    private final DoctorRepository doctorRepository;
 
-    @Autowired
-    private PatientRepository patientRepository;
+    private final PatientRepository patientRepository;
 
-    @Autowired
-    private SecretaryRepository secretaryRepository;
+    private final SecretaryRepository secretaryRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     @Transactional
     public UserEntity execute(CreateUserDTO userDTO) {

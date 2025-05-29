@@ -3,7 +3,6 @@ package br.com.meusintoma.modules.email.services;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,21 +17,19 @@ import br.com.meusintoma.utils.helpers.CryptoUtils;
 import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
 import br.com.meusintoma.utils.helpers.SystemClockUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class ResetPasswordService {
 
-    @Autowired
-    private EmailAsyncService emailAsyncService;
+    private final EmailAsyncService emailAsyncService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private CryptoUtils cryptoUtils;
+    private final CryptoUtils cryptoUtils;
 
-    @Autowired
-    private UserConfirmService userConfirmService;
+    private final UserConfirmService userConfirmService;
 
     @Value("${spring.mail.username}")
     private String username;
@@ -40,8 +37,7 @@ public class ResetPasswordService {
     @Value("${app.test.url}")
     private String url;
 
-    @Autowired
-    private EmailConfirmationRepository emailConfirmationRepository;
+    private final EmailConfirmationRepository emailConfirmationRepository;
 
     public void sendEmailResetPassword(PasswordEmailResetRequestDTO emailResetRequestDTO) {
 

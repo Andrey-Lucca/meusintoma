@@ -3,7 +3,6 @@ package br.com.meusintoma.modules.doctorSecretary.controller;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,13 +21,15 @@ import br.com.meusintoma.modules.doctorSecretary.dto.DoctorSecretaryAssociationR
 import br.com.meusintoma.modules.doctorSecretary.dto.DoctorSecretaryRequestDTO;
 import br.com.meusintoma.modules.doctorSecretary.dto.DoctorSecretaryResponseDTO;
 import br.com.meusintoma.modules.doctorSecretary.services.DoctorSecretaryService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/doctor-secretary")
+@RequiredArgsConstructor
+
 public class DoctorSecretaryController {
 
-    @Autowired
-    private DoctorSecretaryService doctorSecretaryService;
+    private final DoctorSecretaryService doctorSecretaryService;
 
     @PostMapping("/associate")
     @PreAuthorize("hasRole('DOCTOR')")

@@ -3,7 +3,6 @@ package br.com.meusintoma.modules.email.services;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,18 +15,18 @@ import br.com.meusintoma.utils.helpers.CryptoUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
 import br.com.meusintoma.utils.helpers.SystemClockUtils;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
+
 public class EmailService {
 
-    @Autowired
-    private EmailConfirmationRepository emailConfirmationRepository;
+    private final EmailConfirmationRepository emailConfirmationRepository;
 
-    @Autowired
-    private EmailAsyncService emailAsyncService;
+    private final EmailAsyncService emailAsyncService;
 
-    @Autowired
-    private CryptoUtils cryptoUtils;
+    private final CryptoUtils cryptoUtils;
 
     @Value("${spring.mail.username}")
     private String username;

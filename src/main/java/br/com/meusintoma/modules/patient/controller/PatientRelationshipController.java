@@ -2,7 +2,6 @@ package br.com.meusintoma.modules.patient.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,13 +11,15 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
 import br.com.meusintoma.modules.patient.dto.PatientRelationshipDTO;
 import br.com.meusintoma.modules.patient.services.PatientRelationshipService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/patient")
+@RequiredArgsConstructor
+
 public class PatientRelationshipController {
 
-    @Autowired
-    PatientRelationshipService patientRelationshipService;
+    private final PatientRelationshipService patientRelationshipService;
 
     @GetMapping("/relationship")
     @PreAuthorize("hasRole('PATIENT')")

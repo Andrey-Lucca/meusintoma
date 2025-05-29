@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
@@ -27,18 +26,18 @@ import br.com.meusintoma.modules.doctorSecretary.services.DoctorSecretaryService
 import br.com.meusintoma.modules.patient.entity.PatientEntity;
 import br.com.meusintoma.security.utils.AuthValidatorUtils;
 import br.com.meusintoma.utils.helpers.SystemClockUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
+
 public class ConsultationUtilsService {
 
-    @Autowired
-    CalendarService calendarService;
+    private final CalendarService calendarService;
 
-    @Autowired
-    ConsultationRepository consultationRepository;
+    private final ConsultationRepository consultationRepository;
 
-    @Autowired
-    DoctorSecretaryService doctorSecretaryService;
+    private final DoctorSecretaryService doctorSecretaryService;
 
     private List<ConsultationStatus> statuses = new ArrayList<>(List.of(
             ConsultationStatus.PENDING,

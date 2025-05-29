@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
@@ -23,18 +22,18 @@ import br.com.meusintoma.security.utils.AuthValidatorUtils;
 import br.com.meusintoma.utils.common.StatusResult;
 import br.com.meusintoma.utils.helpers.GenericUtils;
 import br.com.meusintoma.utils.helpers.RepositoryUtils;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
+
 public class PatientHealthPlanService {
 
-    @Autowired
-    HealthPlanService healthPlanService;
+    private final HealthPlanService healthPlanService;
 
-    @Autowired
-    PatientService patientService;
+    private final PatientService patientService;
 
-    @Autowired
-    PatientHealthPlanRepository patientHealthPlanRepository;
+    private final PatientHealthPlanRepository patientHealthPlanRepository;
 
     public List<PatientHealthPlanAssociationResultDTO> associate(PatientHealthPlanRequestDTO dto) {
         List<PatientHealthPlanAssociationResultDTO> results = new ArrayList<>();
