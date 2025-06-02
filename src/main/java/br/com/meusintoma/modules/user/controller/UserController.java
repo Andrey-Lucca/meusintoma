@@ -21,16 +21,14 @@ public class UserController {
     private final CreateUserService createUserService;
 
     @PostMapping("/create")
-    public ResponseEntity<Object> create(@RequestBody CreateUserDTO userDTO) {
+    public ResponseEntity<UserEntity> create(@RequestBody CreateUserDTO userDTO) {
         try {
             UserEntity user = this.createUserService.execute(userDTO);
-           
             return ResponseEntity.ok().body(user);
         } catch (UserAlreadyRegistered e) {
             throw e;
-        } catch (Exception error) {
-            error.printStackTrace();
-            return ResponseEntity.badRequest().body(error.getMessage());
+        } catch (Exception e) {
+            throw e;
         }
     }
 

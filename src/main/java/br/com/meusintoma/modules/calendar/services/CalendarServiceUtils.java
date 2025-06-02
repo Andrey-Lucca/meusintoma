@@ -13,6 +13,7 @@ import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.calendar.mapper.CalendarMapperDTO;
 import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import br.com.meusintoma.utils.common.StatusResult;
+import br.com.meusintoma.utils.helpers.SystemClockUtils;
 
 public class CalendarServiceUtils {
 
@@ -31,6 +32,26 @@ public class CalendarServiceUtils {
 
         results.add(calendarResult);
     }
+
+    public static LocalTime calculateInitialSlotTime(GenerateDailySlotsRequestDTO request) {
+        if (request.getDate().isEqual(LocalDate.now())) {
+            LocalTime now = SystemClockUtils.getCurrentTime();
+            return now.isAfter(request.getStartTime())
+                    ? CalendarServiceUtils.roundUpToNearestSlot(now, request.getSlotDurationMinutes())
+                    : request.getStartTime();
+        }
+        return request.getStartTime();
+    }
+
+
+    public static boolean shouldSkipDueToBreak(GenerateDailySlotsRequestDTO request, LocalTime current) {
+    if (request.getBreakStart() == null || request.getBreakEnd() == null) {
+        return false;
+    }
+
+    LocalTime endOfSlot = current.plusMinutes(request.getSlotDurationMinutes());
+    return current.isBefore(request.getBreakEnd()) && endOfSlot.isAfter(request.getBreakStart());
+}
 
     public static CalendarEntity createCalendarSlot(DoctorEntity doctor, LocalTime current,
             GenerateDailySlotsRequestDTO request) {

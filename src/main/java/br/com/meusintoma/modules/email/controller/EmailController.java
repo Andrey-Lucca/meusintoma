@@ -29,7 +29,7 @@ public class EmailController {
     private final ResetPasswordService resetPasswordService;
 
     @GetMapping("/confirm")
-    public ResponseEntity<Object> confirmEmail(@RequestParam String token) {
+    public ResponseEntity<EmailResponseDTO> confirmEmail(@RequestParam String token) {
         try {
             EmailResponseDTO email = emailService.confirmEmail(token);
             return ResponseEntity.ok().body(email);
@@ -40,15 +40,15 @@ public class EmailController {
         } catch (ForbiddenException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Não foi possível confirmar o e-mail");
+            throw e;
         }
     }
 
     @PostMapping("/resend-confirmation")
-    public ResponseEntity<?> resendEmail(@RequestBody ResendEmailDTO resendDTO) {
+    public ResponseEntity<Void> resendEmail(@RequestBody ResendEmailDTO resendDTO) {
         try {
             emailService.resendEmail(resendDTO.getEmail());
-            return ResponseEntity.ok("Email enviado com sucesso");
+            return ResponseEntity.ok().build();
         } catch (NotFoundException e) {
             throw e;
         } catch (ForbiddenException e) {
@@ -56,16 +56,15 @@ public class EmailController {
         } catch (TokenGenerationException e) {
             throw e;
         } catch (Exception e) {
-            //e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Não foi possível reenviar o e-mail");
+            throw e;
         }
     }
 
     @PostMapping("send-reset-password")
-    public ResponseEntity<?> sendEmailResetPassword(@RequestBody PasswordEmailResetRequestDTO requestDTO) {
+    public ResponseEntity<Void> sendEmailResetPassword(@RequestBody PasswordEmailResetRequestDTO requestDTO) {
         try {
             resetPasswordService.sendEmailResetPassword(requestDTO);
-            return ResponseEntity.ok("Email enviado com sucesso");
+            return ResponseEntity.ok().build();
         } catch (NotFoundException e) {
             throw e;
         } catch (ForbiddenException e) {
@@ -73,16 +72,17 @@ public class EmailController {
         } catch (TokenGenerationException e) {
             throw e;
         } catch (Exception e) {
-            //e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Não foi possível reenviar o e-mail");
+            // e.printStackTrace();
+            throw e;
         }
     }
 
     @PostMapping("reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody PasswordEmailResetRequestDTO requestDTO, @RequestParam String token) {
+    public ResponseEntity<Void> resetPassword(@RequestBody PasswordEmailResetRequestDTO requestDTO,
+            @RequestParam String token) {
         try {
             resetPasswordService.resetPassword(requestDTO, token);
-            return ResponseEntity.ok("Senha alterada");
+            return ResponseEntity.ok().build();
         } catch (NotFoundException e) {
             throw e;
         } catch (ForbiddenException e) {
@@ -90,8 +90,7 @@ public class EmailController {
         } catch (TokenGenerationException e) {
             throw e;
         } catch (Exception e) {
-            //e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Não foi possível reenviar o e-mail");
+            throw e;
         }
     }
 }

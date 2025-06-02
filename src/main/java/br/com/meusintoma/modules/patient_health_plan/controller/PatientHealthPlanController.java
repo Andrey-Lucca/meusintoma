@@ -43,7 +43,7 @@ public class PatientHealthPlanController {
         } catch (NotFoundException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Something goes wrong to asssociate");
+            throw e;
         }
     }
 
@@ -60,7 +60,8 @@ public class PatientHealthPlanController {
         } catch (NotFoundException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Something goes wrong to asssociate");
+            throw e;
+
         }
     }
 
@@ -76,7 +77,8 @@ public class PatientHealthPlanController {
         } catch (NotFoundException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Something goes wrong to asssociate");
+            throw e;
+
         }
     }
 }

@@ -33,7 +33,8 @@ public class DoctorSecretaryController {
 
     @PostMapping("/associate")
     @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<?> associateDoctorAndSecretary(@RequestBody DoctorSecretaryAssociationRequestDTO requestDTO) {
+    public ResponseEntity<DoctorSecretaryResponseDTO> associateDoctorAndSecretary(
+            @RequestBody DoctorSecretaryAssociationRequestDTO requestDTO) {
         try {
             DoctorSecretaryResponseDTO associatedDoctorSecretary = doctorSecretaryService.association(
                     requestDTO.getDoctorId(),
@@ -44,13 +45,13 @@ public class DoctorSecretaryController {
         } catch (CustomAccessDeniedException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Erro ao associar doutor e secretária.");
+            throw e;
         }
     }
 
     @PutMapping("invite/{inviteId}/status")
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
-    public ResponseEntity<?> changeRelationshipStatus(@PathVariable UUID inviteId,
+    public ResponseEntity<DoctorSecretaryResponseDTO> changeRelationshipStatus(@PathVariable UUID inviteId,
             @RequestBody DoctorSecretaryRequestDTO requestDTO) {
         try {
             DoctorSecretaryResponseDTO updatedDoctorSecretaryStatus = doctorSecretaryService
@@ -61,13 +62,13 @@ public class DoctorSecretaryController {
         } catch (CustomAccessDeniedException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Erro ao atualizar o status da associação.");
+            throw e;
         }
     }
 
     @GetMapping("invite/{inviteId}")
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
-    public ResponseEntity<?> getInviteById(@PathVariable UUID inviteId) {
+    public ResponseEntity<DoctorSecretaryResponseDTO> getInviteById(@PathVariable UUID inviteId) {
         try {
             DoctorSecretaryResponseDTO invite = doctorSecretaryService.getDoctorSecretaryInvites(inviteId);
             return ResponseEntity.ok().body(invite);
@@ -76,13 +77,13 @@ public class DoctorSecretaryController {
         } catch (CustomAccessDeniedException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Erro ao buscar o convite.");
+            throw e;
         }
     }
 
     @GetMapping("/doctor/{doctorId}")
     @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<?> getAllAssociationsByDoctor(@PathVariable UUID doctorId) {
+    public ResponseEntity<List<DoctorSecretaryResponseDTO>> getAllAssociationsByDoctor(@PathVariable UUID doctorId) {
         try {
             List<DoctorSecretaryResponseDTO> doctorAssociations = doctorSecretaryService
                     .getAssociatedDoctorSecretaryByDoctorId(doctorId);
@@ -92,18 +93,18 @@ public class DoctorSecretaryController {
         } catch (NoContentException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Erro ao buscar associações do médico.");
+            throw e;
         }
     }
 
     @GetMapping("/me")
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
-    public ResponseEntity<?> getMyInvites() {
+    public ResponseEntity<List<DoctorSecretaryResponseDTO>> getMyInvites() {
         try {
             List<DoctorSecretaryResponseDTO> invites = doctorSecretaryService.getAllInvitesByUserId();
             return ResponseEntity.ok().body(invites);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Erro ao buscar seus convites.");
+            throw e;
         }
     }
 

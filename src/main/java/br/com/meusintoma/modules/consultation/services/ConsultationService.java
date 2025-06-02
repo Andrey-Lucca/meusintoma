@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import org.springframework.stereotype.Service;
 
@@ -49,17 +50,21 @@ public class ConsultationService {
 
         private final DoctorSecretaryService doctorSecretaryService;
 
+        private Supplier<NotFoundException> NotFoundConsultationException(){
+                return () -> new NotFoundException("Consulta");
+        }
+
         public ConsultationEntity findConsultation(UUID consultationId) {
                 ConsultationEntity consultation = RepositoryUtils.findOrThrow(
                                 consultationRepository.findById(consultationId),
-                                () -> new NotFoundException("Consulta"));
+                                NotFoundConsultationException());
                 return consultation;
         }
 
         public ConsultationEntity findConsultationWithCalendar(UUID id) {
                 return RepositoryUtils.findOrThrow(
                                 consultationRepository.findWithCalendarSlotById(id),
-                                () -> new NotFoundException("Consulta"));
+                                NotFoundConsultationException());
         }
 
         public ConsultationResponseDTO createConsultation(UUID calendarId, String healthPlan) {
@@ -159,7 +164,7 @@ public class ConsultationService {
         public ConsultationCanceledResponseDTO cancelConsultation(UUID consultationId) {
                 ConsultationEntity consultation = RepositoryUtils.findOrThrow(
                                 consultationRepository.findById(consultationId),
-                                () -> new NotFoundException("Consulta"));
+                                NotFoundConsultationException());
 
                 consultationUtilsService.checkStatusAndPermissions(consultation);
 

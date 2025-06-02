@@ -43,7 +43,7 @@ public class DoctorPatientInvitationController {
         } catch (DoctorPatientDuplicatedInviteException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Something goes wrong on create the invite");
+            throw e;
         }
     }
 
@@ -56,7 +56,7 @@ public class DoctorPatientInvitationController {
         } catch (NoContentException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Something goes wrong on create the invite");
+            throw e;
         }
     }
 
@@ -72,7 +72,7 @@ public class DoctorPatientInvitationController {
         } catch (NoContentException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Something goes wrong on create the invite");
+            throw e;
         }
     }
 
@@ -90,7 +90,7 @@ public class DoctorPatientInvitationController {
         } catch (DoctorPatientNotValidStatusException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Something goes wrong on update the invite");
+            throw e;
         }
     }
 
@@ -109,7 +109,7 @@ public class DoctorPatientInvitationController {
         } catch (DoctorPatientNotValidStatusException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Something goes wrong on update the invite");
+            throw e;
         }
     }
 }

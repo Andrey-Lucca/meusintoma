@@ -19,13 +19,12 @@ import br.com.meusintoma.modules.calendar.repository.CalendarRepository;
 import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
 import br.com.meusintoma.modules.doctor.services.DoctorService;
 import br.com.meusintoma.utils.common.StatusResult;
-import br.com.meusintoma.utils.helpers.SystemClockUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class CalendarSlotService {
-    
+
     private final CalendarRepository calendarRepository;
 
     private final CalendarService calendarService;
@@ -35,67 +34,37 @@ public class CalendarSlotService {
     private final DoctorService doctorService;
 
     public List<CalendarResultDTO> generateDailySlots(GenerateDailySlotsRequestDTO request) {
-
-        if (!request.isValid()) {
-            throw new IllegalArgumentException("Parâmetros inválidos para geração de slots");
-        }
-
-        calendarPermissionService.validatePermissionCalendar(request.getDoctorId(),
-                Optional.ofNullable(request.getDate()));
+        validateRequest(request);
 
         DoctorEntity doctor = doctorService.findDoctor(request.getDoctorId());
-
         List<CalendarResultDTO> results = new ArrayList<>();
-
         List<CalendarEntity> slots = new ArrayList<>();
 
-        LocalTime current;
-        int slotDurationMinutes = request.getSlotDurationMinutes();
-
-        if (request.getDate().isEqual(LocalDate.now())) {
-            LocalTime now = SystemClockUtils.getCurrentTime();
-            current = now.isAfter(request.getStartTime())
-                    ? CalendarServiceUtils.roundUpToNearestSlot(now, slotDurationMinutes)
-                    : request.getStartTime();
-        } else {
-            current = request.getStartTime();
-        }
-
+        LocalTime current = CalendarServiceUtils.calculateInitialSlotTime(request);
         LocalTime endTime = request.getEndTime();
 
-        while (true) {
-            LocalTime endOfSlot = current.plusMinutes(slotDurationMinutes);
-            if (endOfSlot.isAfter(endTime)) {
-                break;
-            }
-            
-            boolean isBreaksNull = request.getBreakStart() == null || request.getBreakEnd() == null;
-            boolean isInInterval = current.isBefore(request.getBreakEnd())
-                    && current.plusMinutes(slotDurationMinutes).isAfter(request.getBreakStart());
+        while (current.plusMinutes(request.getSlotDurationMinutes()).isBefore(endTime) ||
+                current.plusMinutes(request.getSlotDurationMinutes()).equals(endTime)) {
 
-            if (isBreaksNull || !isInInterval) {
-                boolean isDoctorAlreadyHaveCalendarSlot = calendarService.doctorAlreadyHaveCalendarSlot(doctor.getId(),
-                        request.getDate(), current);
-
-                if (isDoctorAlreadyHaveCalendarSlot) {
-                    CalendarServiceUtils.addResult(results, StatusResult.ALREADY_EXISTS, null,
-                            "Esse horário já consta no seu calendário");
-                } else {
-                    try {
-                        CalendarEntity calendar = CalendarServiceUtils.createCalendarSlot(doctor, current, request);
-                        slots.add(calendar);
-                        CalendarServiceUtils.addResult(results, StatusResult.CREATED, calendar,
-                                "Horário criado com sucesso");
-                    } catch (Exception e) {
-                        CalendarServiceUtils.addResult(results, StatusResult.ERROR, null,
-                                "Não foi possível associar o calendário");
-                    }
-                }
-            } else {
+            if (CalendarServiceUtils.shouldSkipDueToBreak(request, current)) {
                 CalendarServiceUtils.addResult(results, StatusResult.ERROR, null,
                         "O horário invade o horário de parada, pulando");
+            } else if (calendarService.doctorAlreadyHaveCalendarSlot(doctor.getId(), request.getDate(), current)) {
+                CalendarServiceUtils.addResult(results, StatusResult.ALREADY_EXISTS, null,
+                        "Esse horário já consta no seu calendário");
+            } else {
+                try {
+                    CalendarEntity calendar = CalendarServiceUtils.createCalendarSlot(doctor, current, request);
+                    slots.add(calendar);
+                    CalendarServiceUtils.addResult(results, StatusResult.CREATED, calendar,
+                            "Horário criado com sucesso");
+                } catch (Exception e) {
+                    CalendarServiceUtils.addResult(results, StatusResult.ERROR, null,
+                            "Não foi possível associar o calendário");
+                }
             }
-            current = current.plusMinutes(slotDurationMinutes);
+
+            current = current.plusMinutes(request.getSlotDurationMinutes());
         }
 
         saveAll(slots);
@@ -150,6 +119,14 @@ public class CalendarSlotService {
 
     public List<CalendarEntity> saveAll(List<CalendarEntity> slots) {
         return calendarRepository.saveAll(slots);
+    }
+
+    private void validateRequest(GenerateDailySlotsRequestDTO request) {
+        if (!request.isValid()) {
+            throw new IllegalArgumentException("Parâmetros inválidos para geração de slots");
+        }
+        calendarPermissionService.validatePermissionCalendar(request.getDoctorId(),
+                Optional.ofNullable(request.getDate()));
     }
 
 }

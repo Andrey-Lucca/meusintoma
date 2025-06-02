@@ -59,7 +59,7 @@ public class ConsultationController {
         } catch (AlreadyHaveConsultationException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Algo deu errado ao criar as consultas");
+            throw e;
         }
     }
 
@@ -71,8 +71,7 @@ public class ConsultationController {
         } catch (NoContentException e) {
             throw e;
         } catch (Exception e) {
-            // e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Algo deu errado ao exibir as consultas");
+            throw e;
         }
     }
 
@@ -87,7 +86,7 @@ public class ConsultationController {
         } catch (NoContentException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Algo deu errado ao exibir as consultas");
+            throw e;
         }
     }
 
@@ -103,8 +102,7 @@ public class ConsultationController {
         } catch (UnalterableException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Algo deu errado ao cancelar a consulta");
+            throw e;
         }
     }
 
@@ -121,8 +119,7 @@ public class ConsultationController {
         } catch (UnalterableException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Algo deu errado ao cancelar a consulta");
+            throw e;
         }
     }
 
@@ -136,7 +133,7 @@ public class ConsultationController {
         } catch (UnalterableException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Algo deu errado ao cancelar a consulta");
+            throw e;
         }
     }
 }

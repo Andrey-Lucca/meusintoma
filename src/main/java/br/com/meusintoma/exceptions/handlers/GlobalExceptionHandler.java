@@ -90,4 +90,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
+        ErrorResponse error = new ErrorResponse(
+                "INTERNAL_SERVER_ERROR",
+                ex.getMessage(),
+                "Algo deu errado! Já iremos resolver.");
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

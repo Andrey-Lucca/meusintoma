@@ -30,7 +30,7 @@ public class CryptoUtils {
     public String encrypt(String stringToEncrypt) {
         try {
             SecretKey secretKey = getKeyFromPassword(password, salt);
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             return Base64.getEncoder()
                     .encodeToString(cipher.doFinal(stringToEncrypt.getBytes("UTF-8")));
@@ -42,7 +42,7 @@ public class CryptoUtils {
     public String decrypt(String stringToDecrypt) {
         try {
             SecretKey secretKey = getKeyFromPassword(password, salt);
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
             return new String(cipher.doFinal(Base64.getDecoder().decode(stringToDecrypt)));
         } catch (IllegalArgumentException | BadPaddingException | IllegalBlockSizeException e) {

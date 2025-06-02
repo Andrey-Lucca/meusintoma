@@ -30,19 +30,20 @@ import lombok.RequiredArgsConstructor;
 public class CalendarHealthPlanController {
 
     private final CalendarHealthPlanService calendarHealthPlanService;
-    
+
     @PostMapping
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
-    public ResponseEntity<Object> associateCalendarAndPlan(@RequestBody CalendarHealthPlanAssociateRequestDTO requestDTO){
+    public ResponseEntity<Object> associateCalendarAndPlan(
+            @RequestBody CalendarHealthPlanAssociateRequestDTO requestDTO) {
         try {
-            List<CalendarHealthPlanResponseCreationDTO> associations = calendarHealthPlanService.associateHealthPlanToCalendar(requestDTO);
+            List<CalendarHealthPlanResponseCreationDTO> associations = calendarHealthPlanService
+                    .associateHealthPlanToCalendar(requestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(associations);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Algo deu errado. Já iremos resolver");
+            throw e;
         }
     }
 
-    
     @GetMapping("{doctorId}/specifical-calendar-with-health-plans/calendar/{calendarId}")
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     public ResponseEntity<Object> getSpecificalDoctorCalendar(@PathVariable UUID doctorId,
@@ -58,7 +59,7 @@ public class CalendarHealthPlanController {
         } catch (NotFoundException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Algo deu errado! Já iremos resolver");
+            throw e;
         }
     }
 
@@ -76,8 +77,8 @@ public class CalendarHealthPlanController {
         } catch (NotFoundException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Algo deu errado! Já iremos resolver");
+            //e.printStackTrace();
+            throw e;
         }
     }
 
@@ -95,7 +96,7 @@ public class CalendarHealthPlanController {
         } catch (NotFoundException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Algo deu errado! Já iremos resolver");
+            throw e;
         }
     }
 
@@ -116,7 +117,7 @@ public class CalendarHealthPlanController {
         } catch (NotFoundException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Algo deu errado! Já iremos resolver");
+            throw e;
         }
     }
 }
