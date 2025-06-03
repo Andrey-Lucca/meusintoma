@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
-import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
 import br.com.meusintoma.modules.calendar.dto.CalendarResultDTO;
 import br.com.meusintoma.modules.calendar.dto.CalendarWeeklySlotsGenerationDTO;
 import br.com.meusintoma.modules.calendar.dto.GenerateDailySlotsRequestDTO;
@@ -28,28 +26,16 @@ public class CalendarBulkController {
         @PostMapping("/daily-slots")
         @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
         public ResponseEntity<Object> createDailySlots(@RequestBody GenerateDailySlotsRequestDTO requestDTO) {
-                try {
-                        List<CalendarResultDTO> results = calendarSlotService.generateDailySlots(requestDTO);
-                        return ResponseEntity.status(HttpStatus.CREATED).body(results);
-                } catch (InvalidDateException | CustomAccessDeniedException e) {
-                        throw e;
-                } catch (Exception e) {
-                        e.printStackTrace();
-                        return ResponseEntity.badRequest().body("Não foi possível criar o calendário");
-                }
+                List<CalendarResultDTO> results = calendarSlotService.generateDailySlots(requestDTO);
+                return ResponseEntity.status(HttpStatus.CREATED).body(results);
         }
 
         @PostMapping("weekly-slots")
         @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
         public ResponseEntity<List<CalendarResultDTO>> createWeeklySlots(
                         @RequestBody CalendarWeeklySlotsGenerationDTO requestDTO) {
-                try {
-                        List<CalendarResultDTO> results = calendarSlotService.generateWeeklyCalendarResults(requestDTO);
-                        return ResponseEntity.status(HttpStatus.CREATED).body(results);
-                } catch (InvalidDateException | CustomAccessDeniedException e) {
-                        throw e;
-                } catch (Exception e) {
-                        return ResponseEntity.badRequest().build();
-                }
+                List<CalendarResultDTO> results = calendarSlotService.generateWeeklyCalendarResults(requestDTO);
+                return ResponseEntity.status(HttpStatus.CREATED).body(results);
         }
+
 }

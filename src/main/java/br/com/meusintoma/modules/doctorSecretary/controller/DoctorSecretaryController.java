@@ -13,10 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.meusintoma.exceptions.globalCustomException.AlreadyExistsException;
-import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
-import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
-import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.doctorSecretary.dto.DoctorSecretaryAssociationRequestDTO;
 import br.com.meusintoma.modules.doctorSecretary.dto.DoctorSecretaryRequestDTO;
 import br.com.meusintoma.modules.doctorSecretary.dto.DoctorSecretaryResponseDTO;
@@ -35,77 +31,41 @@ public class DoctorSecretaryController {
     @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<DoctorSecretaryResponseDTO> associateDoctorAndSecretary(
             @RequestBody DoctorSecretaryAssociationRequestDTO requestDTO) {
-        try {
-            DoctorSecretaryResponseDTO associatedDoctorSecretary = doctorSecretaryService.association(
-                    requestDTO.getDoctorId(),
-                    requestDTO.getSecretaryId());
-            return ResponseEntity.ok().body(associatedDoctorSecretary);
-        } catch (AlreadyExistsException e) {
-            throw e;
-        } catch (CustomAccessDeniedException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+        DoctorSecretaryResponseDTO associatedDoctorSecretary = doctorSecretaryService.association(
+                requestDTO.getDoctorId(),
+                requestDTO.getSecretaryId());
+        return ResponseEntity.ok().body(associatedDoctorSecretary);
     }
 
     @PutMapping("invite/{inviteId}/status")
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     public ResponseEntity<DoctorSecretaryResponseDTO> changeRelationshipStatus(@PathVariable UUID inviteId,
             @RequestBody DoctorSecretaryRequestDTO requestDTO) {
-        try {
-            DoctorSecretaryResponseDTO updatedDoctorSecretaryStatus = doctorSecretaryService
-                    .changeDoctorSecretaryRelationshipStatus(inviteId, requestDTO);
-            return ResponseEntity.ok().body(updatedDoctorSecretaryStatus);
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (CustomAccessDeniedException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+        DoctorSecretaryResponseDTO updatedDoctorSecretaryStatus = doctorSecretaryService
+                .changeDoctorSecretaryRelationshipStatus(inviteId, requestDTO);
+        return ResponseEntity.ok().body(updatedDoctorSecretaryStatus);
     }
 
     @GetMapping("invite/{inviteId}")
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     public ResponseEntity<DoctorSecretaryResponseDTO> getInviteById(@PathVariable UUID inviteId) {
-        try {
-            DoctorSecretaryResponseDTO invite = doctorSecretaryService.getDoctorSecretaryInvites(inviteId);
-            return ResponseEntity.ok().body(invite);
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (CustomAccessDeniedException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+        DoctorSecretaryResponseDTO invite = doctorSecretaryService.getDoctorSecretaryInvites(inviteId);
+        return ResponseEntity.ok().body(invite);
     }
 
     @GetMapping("/doctor/{doctorId}")
     @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<List<DoctorSecretaryResponseDTO>> getAllAssociationsByDoctor(@PathVariable UUID doctorId) {
-        try {
-            List<DoctorSecretaryResponseDTO> doctorAssociations = doctorSecretaryService
-                    .getAssociatedDoctorSecretaryByDoctorId(doctorId);
-            return ResponseEntity.ok().body(doctorAssociations);
-        } catch (CustomAccessDeniedException e) {
-            throw e;
-        } catch (NoContentException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+        List<DoctorSecretaryResponseDTO> doctorAssociations = doctorSecretaryService
+                .getAssociatedDoctorSecretaryByDoctorId(doctorId);
+        return ResponseEntity.ok().body(doctorAssociations);
     }
 
     @GetMapping("/me")
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     public ResponseEntity<List<DoctorSecretaryResponseDTO>> getMyInvites() {
-        try {
-            List<DoctorSecretaryResponseDTO> invites = doctorSecretaryService.getAllInvitesByUserId();
-            return ResponseEntity.ok().body(invites);
-        } catch (Exception e) {
-            throw e;
-        }
+        List<DoctorSecretaryResponseDTO> invites = doctorSecretaryService.getAllInvitesByUserId();
+        return ResponseEntity.ok().body(invites);
     }
 
 }

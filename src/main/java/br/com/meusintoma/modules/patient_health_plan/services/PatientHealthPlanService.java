@@ -80,8 +80,6 @@ public class PatientHealthPlanService {
                 patientHealthPlanRepository.getAllPlansByPatientId(requestPatientId),
                 () -> new NotFoundException("Paciente-Plano"));
 
-        // GenericUtils.checkIsEmptyList(associations);
-
         return associations.stream().map(PatientHealthPlanMapper::toPatientHealthPlanResponse).toList();
     }
 

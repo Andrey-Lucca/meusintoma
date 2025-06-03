@@ -14,14 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
-import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
-import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
-import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.calendar.dto.CalendarConsultationRequestDTO;
 import br.com.meusintoma.modules.calendar.dto.CalendarConsultationResponseDTO;
 import br.com.meusintoma.modules.calendar.dto.UpdateCalendarDTO;
-import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.NoDoctorCalendarException;
 import br.com.meusintoma.modules.calendar.services.CalendarPermissionService;
 import br.com.meusintoma.modules.calendar.services.CalendarService;
@@ -47,7 +42,7 @@ public class CalendarController {
         } catch (NoDoctorCalendarException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Houve uma exceção ao tentar visualizar o calendário do doutor!");
+            throw e;
         }
     }
 
@@ -55,57 +50,27 @@ public class CalendarController {
     @GetMapping("/calendar-consult")
     public ResponseEntity<Object> getCalendarConsult(
             @RequestBody CalendarConsultationRequestDTO calendarConsultationRequestDTO) {
-        try {
-            List<CalendarConsultationResponseDTO> calendars = calendarService
-                    .getCalendarConsultation(calendarConsultationRequestDTO);
-            return ResponseEntity.ok().body(calendars);
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (NoContentException e) {
-            throw e;
-        } catch (CustomAccessDeniedException e) {
-            throw e;
-        } catch (InvalidDateException e) {
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body("Houve uma exceção ao tentar visualizar o calendário do doutor!");
-        }
+        List<CalendarConsultationResponseDTO> calendars = calendarService
+                .getCalendarConsultation(calendarConsultationRequestDTO);
+        return ResponseEntity.ok().body(calendars);
     }
 
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     @PatchMapping("/doctor/{doctorId}/{calendarId}")
     public ResponseEntity<Object> updateCalendarStatus(@PathVariable UUID doctorId, @PathVariable UUID calendarId,
             @RequestBody UpdateCalendarDTO statusDto) {
-        try {
-            calendarService.verifyDoctorHasCalendar(doctorId);
-            calendarPermissionService.validatePermissionCalendar(doctorId, Optional.empty());
-            var response = calendarService.updateCalendarStatus(calendarId, statusDto.getStatus());
-            return ResponseEntity.ok().body(response);
-
-        } catch (InvalidDateException | CustomAccessDeniedException e) {
-            throw e;
-        } catch (NoDoctorCalendarException | CalendarNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Ocorreu um erro ao tentar excluir esse horário do calendário");
-        }
+        calendarService.verifyDoctorHasCalendar(doctorId);
+        calendarPermissionService.validatePermissionCalendar(doctorId, Optional.empty());
+        var response = calendarService.updateCalendarStatus(calendarId, statusDto.getStatus());
+        return ResponseEntity.ok().body(response);
     }
 
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     @DeleteMapping("/doctor/{doctorId}/{calendarId}")
     public ResponseEntity<Object> deleteCalendarById(@PathVariable UUID calendarId, @PathVariable UUID doctorId) {
-        try {
-            calendarService.verifyDoctorHasCalendar(doctorId);
-            calendarPermissionService.validatePermissionCalendar(doctorId, Optional.empty());
-            calendarService.deleteCalendarById(calendarId);
-            return ResponseEntity.ok().body("Horário removido com sucesso");
-        } catch (InvalidDateException | CustomAccessDeniedException e) {
-            throw e;
-        } catch (NoDoctorCalendarException | CalendarNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Ocorreu um erro ao tentar excluir esse horário do calendário");
-        }
+        calendarService.verifyDoctorHasCalendar(doctorId);
+        calendarPermissionService.validatePermissionCalendar(doctorId, Optional.empty());
+        calendarService.deleteCalendarById(calendarId);
+        return ResponseEntity.ok().body("Horário removido com sucesso");
     }
 }

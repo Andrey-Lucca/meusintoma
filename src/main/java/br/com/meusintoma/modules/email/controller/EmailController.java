@@ -8,13 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.meusintoma.exceptions.globalCustomException.ForbiddenException;
-import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.email.dto.EmailResponseDTO;
 import br.com.meusintoma.modules.email.dto.PasswordEmailResetRequestDTO;
 import br.com.meusintoma.modules.email.dto.ResendEmailDTO;
-import br.com.meusintoma.modules.email.exception.InvalidTokenException;
-import br.com.meusintoma.modules.email.exception.TokenGenerationException;
 import br.com.meusintoma.modules.email.services.EmailService;
 import br.com.meusintoma.modules.email.services.ResetPasswordService;
 import lombok.RequiredArgsConstructor;
@@ -30,67 +26,26 @@ public class EmailController {
 
     @GetMapping("/confirm")
     public ResponseEntity<EmailResponseDTO> confirmEmail(@RequestParam String token) {
-        try {
-            EmailResponseDTO email = emailService.confirmEmail(token);
-            return ResponseEntity.ok().body(email);
-        } catch (InvalidTokenException e) {
-            throw e;
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (ForbiddenException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+        EmailResponseDTO email = emailService.confirmEmail(token);
+        return ResponseEntity.ok().body(email);
     }
 
     @PostMapping("/resend-confirmation")
     public ResponseEntity<Void> resendEmail(@RequestBody ResendEmailDTO resendDTO) {
-        try {
-            emailService.resendEmail(resendDTO.getEmail());
-            return ResponseEntity.ok().build();
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (ForbiddenException e) {
-            throw e;
-        } catch (TokenGenerationException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+        emailService.resendEmail(resendDTO.getEmail());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("send-reset-password")
     public ResponseEntity<Void> sendEmailResetPassword(@RequestBody PasswordEmailResetRequestDTO requestDTO) {
-        try {
-            resetPasswordService.sendEmailResetPassword(requestDTO);
-            return ResponseEntity.ok().build();
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (ForbiddenException e) {
-            throw e;
-        } catch (TokenGenerationException e) {
-            throw e;
-        } catch (Exception e) {
-            // e.printStackTrace();
-            throw e;
-        }
+        resetPasswordService.sendEmailResetPassword(requestDTO);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("reset-password")
     public ResponseEntity<Void> resetPassword(@RequestBody PasswordEmailResetRequestDTO requestDTO,
             @RequestParam String token) {
-        try {
-            resetPasswordService.resetPassword(requestDTO, token);
-            return ResponseEntity.ok().build();
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (ForbiddenException e) {
-            throw e;
-        } catch (TokenGenerationException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+        resetPasswordService.resetPassword(requestDTO, token);
+        return ResponseEntity.ok().build();
     }
 }

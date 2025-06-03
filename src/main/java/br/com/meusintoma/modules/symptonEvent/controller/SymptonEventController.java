@@ -38,42 +38,29 @@ public class SymptonEventController {
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> create(@RequestBody SymptonEventRequestDTO symptonEventDTO,
             HttpServletRequest request) {
-        try {
-            UUID patientId = AuthUtils.getAuthenticatedUserId(request);
-            var patient = patientRepository.findById(patientId)
-                    .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado"));
+        UUID patientId = AuthUtils.getAuthenticatedUserId(request);
+        var patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado"));
 
-            var symptonEventEntity = SymptonEventMapper.toEntity(symptonEventDTO, patient);
-            var response = this.symptonService.createSymptomEvent(symptonEventEntity);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Não foi possível registrar o sintoma");
-        }
+        var symptonEventEntity = SymptonEventMapper.toEntity(symptonEventDTO, patient);
+        var response = this.symptonService.createSymptomEvent(symptonEventEntity);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> getAllSymptons(HttpServletRequest request) {
-        try {
-            UUID patientId = AuthUtils.getAuthenticatedUserId(request);
-            var response = this.symptonService.getPatientSympton(patientId);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Não foi possível obter os registros do usuário");
-        }
+        UUID patientId = AuthUtils.getAuthenticatedUserId(request);
+        var response = this.symptonService.getPatientSympton(patientId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @GetMapping("/search")
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> getSymptonByName(@RequestParam String symptonName, HttpServletRequest request) {
-        try {
-            UUID patientId = AuthUtils.getAuthenticatedUserId(request);
-            var response = this.symptonService.getPatientSymptomsBySymptonName(patientId, symptonName);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Não foi possível encontrar o sintoma em específico");
-        }
+        UUID patientId = AuthUtils.getAuthenticatedUserId(request);
+        var response = this.symptonService.getPatientSymptomsBySymptonName(patientId, symptonName);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PutMapping("/{symptonId}")
@@ -82,37 +69,25 @@ public class SymptonEventController {
             @PathVariable UUID symptonId,
             @RequestBody SymptonEventRequestDTO symptonEventDTO,
             HttpServletRequest request) {
-        try {
+        UUID patientId = AuthUtils.getAuthenticatedUserId(request);
+        var patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado"));
 
-            UUID patientId = AuthUtils.getAuthenticatedUserId(request);
-            var patient = patientRepository.findById(patientId)
-                    .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado"));
+        var symptonEventEntity = SymptonEventMapper.toEntity(symptonEventDTO, patient);
 
-            var symptonEventEntity = SymptonEventMapper.toEntity(symptonEventDTO, patient);
-
-            var response = this.symptonService.updatePatientSympton(symptonId, symptonEventEntity);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Não foi possível atualizar esse sintoma");
-        }
+        var response = this.symptonService.updatePatientSympton(symptonId, symptonEventEntity);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> deleteSympton(@RequestParam String symptonId, HttpServletRequest request) {
-        try {
-            var patientIdObj = request.getAttribute("user_id");
-            if (patientIdObj == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado");
-            }
-            UUID sympton = UUID.fromString(symptonId.toString());
-            var response = this.symptonService.deleteSympton(sympton);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Não foi possível excluir o sintoma");
+        var patientIdObj = request.getAttribute("user_id");
+        if (patientIdObj == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado");
         }
+        UUID sympton = UUID.fromString(symptonId.toString());
+        var response = this.symptonService.deleteSympton(sympton);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

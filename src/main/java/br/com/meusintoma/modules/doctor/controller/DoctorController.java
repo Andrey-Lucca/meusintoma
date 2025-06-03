@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.doctor.dto.DoctorResponseDTO;
 import br.com.meusintoma.modules.doctor.services.DoctorService;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +22,7 @@ public class DoctorController {
 
     @GetMapping("/{doctorId}")
     public ResponseEntity<Object> getDoctorInfo(@PathVariable UUID doctorId) {
-        try {
-            DoctorResponseDTO doctor = doctorService.getDoctorInfo(doctorId);
-            return ResponseEntity.ok().body(doctor);
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Não foi possível carregar as informações desse médico");
-        }
+        DoctorResponseDTO doctor = doctorService.getDoctorInfo(doctorId);
+        return ResponseEntity.ok().body(doctor);
     }
 }

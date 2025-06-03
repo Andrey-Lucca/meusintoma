@@ -49,7 +49,7 @@ public class DoctorPatientNoteController {
         } catch (CustomAccessDeniedException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("It was not possible create notes");
+            throw e;
         }
     }
 
@@ -63,16 +63,17 @@ public class DoctorPatientNoteController {
         } catch (CustomAccessDeniedException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("It was not possible get notes");
+            throw e;
         }
     }
 
     @PutMapping("relationship/{relationshipId}/note/{noteId}")
-    //@PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
+    // @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     public ResponseEntity<Object> changeNotes(@PathVariable UUID relationshipId, @PathVariable UUID noteId,
             @RequestBody DoctorPatientUpdateNoteDTO notes) {
         try {
-            DoctorPatientNoteGetDTO note = doctorPatientNotesService.updateNote(relationshipId, noteId, notes.getNotes());
+            DoctorPatientNoteGetDTO note = doctorPatientNotesService.updateNote(relationshipId, noteId,
+                    notes.getNotes());
             return ResponseEntity.ok().body(note);
         } catch (ForbiddenException e) {
             throw e;
@@ -81,8 +82,7 @@ public class DoctorPatientNoteController {
         } catch (CustomAccessDeniedException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body("It was not update notes");
+            throw e;
         }
     }
 }

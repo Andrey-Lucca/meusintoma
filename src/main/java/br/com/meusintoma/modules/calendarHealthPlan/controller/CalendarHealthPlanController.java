@@ -14,10 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
-import br.com.meusintoma.exceptions.globalCustomException.InvalidDateException;
-import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
-import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.calendarHealthPlan.dto.CalendarHealthPlanAssociateRequestDTO;
 import br.com.meusintoma.modules.calendarHealthPlan.dto.CalendarHealthPlanResponseCreationDTO;
 import br.com.meusintoma.modules.calendarHealthPlan.services.CalendarHealthPlanService;
@@ -35,69 +31,34 @@ public class CalendarHealthPlanController {
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     public ResponseEntity<Object> associateCalendarAndPlan(
             @RequestBody CalendarHealthPlanAssociateRequestDTO requestDTO) {
-        try {
-            List<CalendarHealthPlanResponseCreationDTO> associations = calendarHealthPlanService
-                    .associateHealthPlanToCalendar(requestDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(associations);
-        } catch (Exception e) {
-            throw e;
-        }
+        List<CalendarHealthPlanResponseCreationDTO> associations = calendarHealthPlanService
+                .associateHealthPlanToCalendar(requestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(associations);
     }
 
     @GetMapping("{doctorId}/specifical-calendar-with-health-plans/calendar/{calendarId}")
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     public ResponseEntity<Object> getSpecificalDoctorCalendar(@PathVariable UUID doctorId,
             @PathVariable UUID calendarId) {
-        try {
-            DoctorCalendarResponseDTO calendar = calendarHealthPlanService
-                    .getSpecificalDoctorCalendarWithHealthPlan(doctorId, calendarId);
-            return ResponseEntity.ok().body(calendar);
-        } catch (NoContentException e) {
-            throw e;
-        } catch (CustomAccessDeniedException e) {
-            throw e;
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+        DoctorCalendarResponseDTO calendar = calendarHealthPlanService
+                .getSpecificalDoctorCalendarWithHealthPlan(doctorId, calendarId);
+        return ResponseEntity.ok().body(calendar);
     }
 
     @GetMapping("{doctorId}/available-calendars-with-health-plans")
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     public ResponseEntity<Object> getDoctorAvaliableCalendar(@PathVariable UUID doctorId) {
-        try {
-            List<DoctorCalendarResponseDTO> calendars = calendarHealthPlanService
-                    .getDoctorCalendarsFilteredWithPatientHealthPlans(doctorId);
-            return ResponseEntity.ok().body(calendars);
-        } catch (CustomAccessDeniedException e) {
-            throw e;
-        } catch (NoContentException e) {
-            throw e;
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            //e.printStackTrace();
-            throw e;
-        }
+        List<DoctorCalendarResponseDTO> calendars = calendarHealthPlanService
+                .getDoctorCalendarsFilteredWithPatientHealthPlans(doctorId);
+        return ResponseEntity.ok().body(calendars);
     }
 
     @GetMapping("{doctorId}/available-calendars-with-health-plans/patient/{patientId}")
     public ResponseEntity<Object> getDoctorAvaliableCalendarByPatient(@PathVariable UUID doctorId,
             @PathVariable UUID patientId) {
-        try {
-            List<DoctorCalendarResponseDTO> calendars = calendarHealthPlanService
-                    .getDoctorCalendarsFilteredWithPatientHealthPlans(doctorId, patientId);
-            return ResponseEntity.ok().body(calendars);
-        } catch (CustomAccessDeniedException e) {
-            throw e;
-        } catch (NoContentException e) {
-            throw e;
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+        List<DoctorCalendarResponseDTO> calendars = calendarHealthPlanService
+                .getDoctorCalendarsFilteredWithPatientHealthPlans(doctorId, patientId);
+        return ResponseEntity.ok().body(calendars);
     }
 
     @DeleteMapping("{doctorId}/delete-calendar/{calendarId}/calendar-health-plan/{calendarHealthPlanId}")
@@ -105,19 +66,7 @@ public class CalendarHealthPlanController {
     public ResponseEntity<Object> deleteDoctorCalendarHealthPlan(@PathVariable UUID doctorId,
             @PathVariable UUID calendarId,
             @PathVariable UUID calendarHealthPlanId) {
-        try {
-            calendarHealthPlanService.deleteCalendarHealthPlan(doctorId, calendarId, calendarHealthPlanId);
-            return ResponseEntity.ok().body("Removido");
-        } catch (CustomAccessDeniedException e) {
-            throw e;
-        } catch (InvalidDateException e) {
-            throw e;
-        } catch (NoContentException e) {
-            throw e;
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+        calendarHealthPlanService.deleteCalendarHealthPlan(doctorId, calendarId, calendarHealthPlanId);
+        return ResponseEntity.ok().body("Removido");
     }
 }

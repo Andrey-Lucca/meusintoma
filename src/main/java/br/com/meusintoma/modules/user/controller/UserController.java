@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.meusintoma.modules.user.dto.CreateUserDTO;
 import br.com.meusintoma.modules.user.entity.UserEntity;
-import br.com.meusintoma.modules.user.exceptions.UserAlreadyRegistered;
 import br.com.meusintoma.modules.user.services.CreateUserService;
 import lombok.RequiredArgsConstructor;
 
@@ -22,14 +21,8 @@ public class UserController {
 
     @PostMapping("/create")
     public ResponseEntity<UserEntity> create(@RequestBody CreateUserDTO userDTO) {
-        try {
-            UserEntity user = this.createUserService.execute(userDTO);
-            return ResponseEntity.ok().body(user);
-        } catch (UserAlreadyRegistered e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+        UserEntity user = this.createUserService.execute(userDTO);
+        return ResponseEntity.ok().body(user);
     }
 
 }

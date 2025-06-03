@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.meusintoma.exceptions.globalCustomException.CustomAccessDeniedException;
-import br.com.meusintoma.exceptions.globalCustomException.NoContentException;
-import br.com.meusintoma.exceptions.globalCustomException.NotFoundException;
 import br.com.meusintoma.modules.patient_health_plan.dto.PatientHealthPlanAssociationResultDTO;
 import br.com.meusintoma.modules.patient_health_plan.dto.PatientHealthPlanRequestDTO;
 import br.com.meusintoma.modules.patient_health_plan.dto.PatientHealthPlanResponseDTO;
@@ -32,53 +29,23 @@ public class PatientHealthPlanController {
     @PostMapping
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> associate(@RequestBody PatientHealthPlanRequestDTO patientHealthPlanRequest) {
-        try {
-            List<PatientHealthPlanAssociationResultDTO> results = patientHealthPlanService
-                    .associate(patientHealthPlanRequest);
-            return ResponseEntity.status(201).body(results);
-        } catch (CustomAccessDeniedException e) {
-            throw e;
-        } catch (NoContentException e) {
-            throw e;
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+        List<PatientHealthPlanAssociationResultDTO> results = patientHealthPlanService
+                .associate(patientHealthPlanRequest);
+        return ResponseEntity.status(201).body(results);
     }
 
     @GetMapping("/plans/{patientId}")
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> getAssociations(@PathVariable UUID patientId) {
-        try {
-            List<PatientHealthPlanResponseDTO> associations = patientHealthPlanService.getPatientHealthPlans(patientId);
-            return ResponseEntity.status(200).body(associations);
-        } catch (CustomAccessDeniedException e) {
-            throw e;
-        } catch (NoContentException e) {
-            throw e;
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-
-        }
+        List<PatientHealthPlanResponseDTO> associations = patientHealthPlanService.getPatientHealthPlans(patientId);
+        return ResponseEntity.status(200).body(associations);
     }
 
     @DeleteMapping("/disassociate/patient-plans/{patientHealthPlanId}")
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Object> disassociate(@PathVariable UUID patientHealthPlanId) {
-        try {
-            PatientHealthPlanResponseDTO deletedAssociation = patientHealthPlanService
-                    .disassociate(patientHealthPlanId);
-            return ResponseEntity.status(200).body(deletedAssociation);
-        } catch (CustomAccessDeniedException e) {
-            throw e;
-        } catch (NotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-
-        }
+        PatientHealthPlanResponseDTO deletedAssociation = patientHealthPlanService
+                .disassociate(patientHealthPlanId);
+        return ResponseEntity.status(200).body(deletedAssociation);
     }
 }
