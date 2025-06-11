@@ -29,12 +29,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ChronicDiseaseService {
 
-    
     private final DiseaseTypeRepository diseaseTypeRepository;
-
     
     private final PatientService patientService;
-
     
     private final ChronicDiseaseRepository chronicDiseaseRepository;
 

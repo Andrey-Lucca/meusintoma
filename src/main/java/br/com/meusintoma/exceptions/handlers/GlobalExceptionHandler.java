@@ -1,5 +1,6 @@
 package br.com.meusintoma.exceptions.handlers;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,6 +17,7 @@ import br.com.meusintoma.exceptions.globalCustomException.UnalterableException;
 import br.com.meusintoma.exceptions.globalCustomException.ForbiddenException;
 
 @ControllerAdvice
+@Order(2)
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidDateException.class)

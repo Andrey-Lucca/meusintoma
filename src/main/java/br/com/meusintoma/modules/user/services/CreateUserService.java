@@ -38,13 +38,21 @@ public class CreateUserService {
     @Transactional
     public UserEntity execute(CreateUserDTO userDTO) {
         validateEmail(userDTO.getEmail());
-
-        userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        setHashedPassword(userDTO);
         UserEntity user = UserMapper.toEntity(userDTO);
-        user.setLocation(GeoUtils.createPoint(userDTO.getLatitude(), userDTO.getLongitude()));
+        setUserLocation(user, userDTO);
         UserEntity savedUser = saveUserByType(user);
+
         emailService.generateAndSendConfirmation(user);
         return savedUser;
+    }
+
+    private void setHashedPassword(CreateUserDTO userDTO) {
+        userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+    }
+
+    private void setUserLocation(UserEntity user, CreateUserDTO userDTO) {
+        user.setLocation(GeoUtils.createPoint(userDTO.getLatitude(), userDTO.getLongitude()));
     }
 
     private void validateEmail(String email) {

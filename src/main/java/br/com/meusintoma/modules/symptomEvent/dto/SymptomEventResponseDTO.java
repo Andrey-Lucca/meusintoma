@@ -1,4 +1,4 @@
-package br.com.meusintoma.modules.symptonEvent.dto;
+package br.com.meusintoma.modules.symptomEvent.dto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SymptonEventResponseDTO {
+public class SymptomEventResponseDTO {
     private UUID id;
-    private String symptonName;
+    private String symptomName;
     private LocalDateTime startedAt;
     private Severity severity;
     private LocalDateTime updatedAt;

@@ -18,4 +18,5 @@ public class UserService {
     public UserEntity findUserByEmail(String email) {
         return RepositoryUtils.findOrThrow(userRepository.findByEmail(email), () -> new NotFoundException("E-mail"));
     }
+
 }

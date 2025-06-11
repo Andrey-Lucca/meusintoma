@@ -7,12 +7,14 @@ import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarStatusException;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
+@Order(1)
 public class CalendarExceptionHandler {
     @ExceptionHandler(NoDoctorCalendarException.class)
     public ResponseEntity<ErrorResponse> handleNoDoctorCalendar(NoDoctorCalendarException ex) {

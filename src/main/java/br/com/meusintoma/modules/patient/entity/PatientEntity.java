@@ -9,7 +9,7 @@ import br.com.meusintoma.modules.chronicdisease.entity.ChronicDiseaseEntity;
 import br.com.meusintoma.modules.consultation.entity.ConsultationEntity;
 import br.com.meusintoma.modules.doctorPatient.entity.DoctorPatientEntity;
 import br.com.meusintoma.modules.patient_health_plan.entity.PatientHealthPlanEntity;
-import br.com.meusintoma.modules.symptonEvent.entity.SymptonEventEntity;
+import br.com.meusintoma.modules.symptomEvent.entity.SymptomEventEntity;
 import br.com.meusintoma.modules.user.entity.UserEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -39,7 +39,7 @@ public class PatientEntity extends UserEntity {
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<SymptonEventEntity> symptonEvents = new ArrayList<>();
+    private List<SymptomEventEntity> symptonEvents = new ArrayList<>();
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

@@ -1,5 +1,6 @@
 package br.com.meusintoma.exceptions.handlers;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -11,9 +12,9 @@ import br.com.meusintoma.modules.user.exceptions.UserAlreadyRegistered;
 import br.com.meusintoma.modules.user.exceptions.UserAuthException;
 
 @ControllerAdvice
+@Order(1)
 public class UserHandler {
 
-    // remover de lugar depois
     @ExceptionHandler(PatientNotFoundException.class)
     public ResponseEntity<ErrorResponse> handlePatientNotFoundEntity(PatientNotFoundException ex) {
         ErrorResponse error = new ErrorResponse(

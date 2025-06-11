@@ -1,4 +1,4 @@
-package br.com.meusintoma.modules.symptonEvent.entity;
+package br.com.meusintoma.modules.symptomEvent.entity;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,16 +21,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "sympton")
+@Entity(name = "symptom")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SymptonEventEntity {
+public class SymptomEventEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    private String symptonName;
+
+    private String symptomName;
 
     @CreationTimestamp
     private LocalDateTime startedAt;

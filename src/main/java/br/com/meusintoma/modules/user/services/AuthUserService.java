@@ -18,8 +18,6 @@ import br.com.meusintoma.modules.user.dto.AuthUserRequestDTO;
 import br.com.meusintoma.modules.user.dto.AuthUserResponseDTO;
 import br.com.meusintoma.modules.user.entity.UserEntity;
 import br.com.meusintoma.modules.user.exceptions.UserAuthException;
-import br.com.meusintoma.modules.user.repository.UserRepository;
-import br.com.meusintoma.utils.helpers.RepositoryUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,7 +26,7 @@ public class AuthUserService {
     @Value("${security.token.secret.user}")
     private String secretKey;
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -55,13 +53,12 @@ public class AuthUserService {
     }
 
     public AuthUserResponseDTO execute(AuthUserRequestDTO userRequestDTO) throws AuthenticationException {
-        UserEntity user = RepositoryUtils.findOrThrow(userRepository.findByEmail(userRequestDTO.getEmail()),
-                () -> new UserAuthException());
+        UserEntity user = userService.findUserByEmail(userRequestDTO.getEmail());
 
         checkPassword(userRequestDTO, user);
         checkConfirmationEmail(user);
-        AuthUserResponseDTO authUserResponseDTO = generateUserResponse(user);
 
+        AuthUserResponseDTO authUserResponseDTO = generateUserResponse(user);
         return authUserResponseDTO;
     }
 }

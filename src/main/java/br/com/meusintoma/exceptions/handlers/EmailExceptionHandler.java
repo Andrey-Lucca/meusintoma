@@ -1,5 +1,6 @@
 package br.com.meusintoma.exceptions.handlers;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,6 +11,7 @@ import br.com.meusintoma.modules.email.exception.InvalidTokenException;
 import br.com.meusintoma.modules.email.exception.TokenGenerationException;
 
 @ControllerAdvice
+@Order(1)
 public class EmailExceptionHandler {
 
     @ExceptionHandler(TokenGenerationException.class)

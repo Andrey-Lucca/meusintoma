@@ -50,7 +50,7 @@ public class ConsultationService {
 
         private final DoctorSecretaryService doctorSecretaryService;
 
-        private Supplier<NotFoundException> NotFoundConsultationException(){
+        private Supplier<NotFoundException> NotFoundConsultationException() {
                 return () -> new NotFoundException("Consulta");
         }
 

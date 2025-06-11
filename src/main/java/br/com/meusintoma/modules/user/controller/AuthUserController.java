@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.meusintoma.modules.user.dto.AuthUserRequestDTO;
+import br.com.meusintoma.modules.user.dto.AuthUserResponseDTO;
 import br.com.meusintoma.modules.user.services.AuthUserService;
 import lombok.RequiredArgsConstructor;
 
@@ -21,9 +22,9 @@ public class AuthUserController {
     private final AuthUserService authUserService;
 
     @PostMapping("/auth")
-    public ResponseEntity<Object> authenticate(@RequestBody AuthUserRequestDTO authUserRequestDTO)
+    public ResponseEntity<AuthUserResponseDTO> authenticate(@RequestBody AuthUserRequestDTO authUserRequestDTO)
             throws AuthenticationException {
-        var result = authUserService.execute(authUserRequestDTO);
+        AuthUserResponseDTO result = authUserService.execute(authUserRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
