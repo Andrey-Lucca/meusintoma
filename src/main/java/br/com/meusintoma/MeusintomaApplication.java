@@ -16,16 +16,13 @@ public class MeusintomaApplication {
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.configure().load();
 
-        // Carrega variáveis do .env como propriedades padrão
         Map<String, Object> envMap = new HashMap<>();
         dotenv.entries().forEach(entry -> {
-            System.out.println("[Dotenv Loaded] " + entry.getKey() + " = " + entry.getValue());
             envMap.put(entry.getKey(), entry.getValue());
-            System.setProperty(entry.getKey(), entry.getValue()); // opcional
         });
 
         SpringApplication app = new SpringApplication(MeusintomaApplication.class);
-        app.setDefaultProperties(envMap); // <- injeta no Spring Boot diretamente
+        app.setDefaultProperties(envMap);
         app.run(args);
     }
 }

@@ -1,7 +1,6 @@
 package br.com.meusintoma.modules.calendar.controller;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -16,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.meusintoma.modules.calendar.dto.CalendarConsultationRequestDTO;
 import br.com.meusintoma.modules.calendar.dto.CalendarConsultationResponseDTO;
+import br.com.meusintoma.modules.calendar.dto.CalendarResponseDTO;
 import br.com.meusintoma.modules.calendar.dto.UpdateCalendarDTO;
-import br.com.meusintoma.modules.calendar.exceptions.NoDoctorCalendarException;
-import br.com.meusintoma.modules.calendar.services.CalendarPermissionService;
+
 import br.com.meusintoma.modules.calendar.services.CalendarService;
 import lombok.RequiredArgsConstructor;
 
@@ -30,20 +29,10 @@ public class CalendarController {
 
     private final CalendarService calendarService;
 
-    private final CalendarPermissionService calendarPermissionService;
-
     @GetMapping("/doctor/{doctorId}")
-    public ResponseEntity<Object> getCalendarByDoctor(@PathVariable UUID doctorId) {
-        try {
-            calendarService.verifyDoctorHasCalendar(doctorId);
-            var response = calendarService.getDoctorCalendar(doctorId);
-            return ResponseEntity.ok().body(response);
-
-        } catch (NoDoctorCalendarException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
+    public ResponseEntity<List<CalendarResponseDTO>> getCalendarByDoctor(@PathVariable UUID doctorId) {
+        List<CalendarResponseDTO> calendars = calendarService.getDoctorCalendar(doctorId);
+        return ResponseEntity.ok().body(calendars);
     }
 
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
@@ -57,19 +46,16 @@ public class CalendarController {
 
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     @PatchMapping("/doctor/{doctorId}/{calendarId}")
-    public ResponseEntity<Object> updateCalendarStatus(@PathVariable UUID doctorId, @PathVariable UUID calendarId,
+    public ResponseEntity<CalendarResponseDTO> updateCalendarStatus(@PathVariable UUID doctorId,
+            @PathVariable UUID calendarId,
             @RequestBody UpdateCalendarDTO statusDto) {
-        calendarService.verifyDoctorHasCalendar(doctorId);
-        calendarPermissionService.validatePermissionCalendar(doctorId, Optional.empty());
-        var response = calendarService.updateCalendarStatus(calendarId, statusDto.getStatus());
-        return ResponseEntity.ok().body(response);
+        CalendarResponseDTO updatedCalendar = calendarService.updateCalendarStatus(calendarId, statusDto.getStatus());
+        return ResponseEntity.ok().body(updatedCalendar);
     }
 
     @PreAuthorize("hasRole('DOCTOR') || hasRole('SECRETARY')")
     @DeleteMapping("/doctor/{doctorId}/{calendarId}")
     public ResponseEntity<Object> deleteCalendarById(@PathVariable UUID calendarId, @PathVariable UUID doctorId) {
-        calendarService.verifyDoctorHasCalendar(doctorId);
-        calendarPermissionService.validatePermissionCalendar(doctorId, Optional.empty());
         calendarService.deleteCalendarById(calendarId);
         return ResponseEntity.ok().body("Horário removido com sucesso");
     }

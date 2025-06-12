@@ -9,6 +9,7 @@ import java.util.UUID;
 import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.calendarHealthPlan.entity.CalendarHealthPlanEntity;
 import br.com.meusintoma.modules.doctor.entity.DoctorEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -37,12 +38,12 @@ public class CalendarEntity {
     private LocalTime startTime;
     private LocalTime endTime;
 
-    @OneToMany(mappedBy = "calendar")
-    @Builder.Default 
+    @OneToMany(mappedBy = "calendar", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<CalendarHealthPlanEntity> linkedHealthPlans = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(name="doctor_id", nullable = false)
+    @JoinColumn(name = "doctor_id", nullable = false)
     private DoctorEntity doctor;
 
     @Enumerated(EnumType.STRING)

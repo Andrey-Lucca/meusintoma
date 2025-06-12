@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### .env ###
+ .env
+
+### application properties and yml ###
+/src/main/java/br/com/meusintoma/MeusintomaApplication.java
+docker-compose.yml

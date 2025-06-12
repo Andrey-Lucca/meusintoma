@@ -2,10 +2,11 @@ package br.com.meusintoma.modules.calendar.services;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -20,7 +21,6 @@ import br.com.meusintoma.modules.calendar.enums.CalendarStatus;
 import br.com.meusintoma.modules.calendar.enums.IntervalChoice;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarNotFoundException;
 import br.com.meusintoma.modules.calendar.exceptions.CalendarStatusException;
-import br.com.meusintoma.modules.calendar.exceptions.NoDoctorCalendarException;
 import br.com.meusintoma.modules.calendar.exceptions.UnavaliableTimeException;
 import br.com.meusintoma.modules.calendar.mapper.CalendarMapperDTO;
 import br.com.meusintoma.modules.calendar.repository.CalendarRepository;
@@ -37,14 +37,15 @@ public class CalendarService {
 
     private final CalendarPermissionService calendarPermissionService;
 
+    private static final Set<IntervalChoice> AUTOMATIC_SYSTEM_DATE_CHOICES = EnumSet.of(IntervalChoice.DAILY,
+            IntervalChoice.WEEKLY);
+
     public boolean doctorAlreadyHaveCalendarSlot(UUID doctorId, LocalDate targetDate, LocalTime startedAt) {
         return calendarRepository.checkDoctorCalendarSlot(doctorId, targetDate, startedAt);
     }
 
-    public void verifyDoctorHasCalendar(UUID doctorId) {
-        if (!calendarRepository.existsByDoctorId(doctorId)) {
-            throw new NoDoctorCalendarException("Nenhum calendário encontrado para o médico");
-        }
+    public void verifyDoctorHasCalendar(List<CalendarEntity> calendars) {
+        GenericUtils.checkIsEmptyList(calendars);
     }
 
     public CalendarEntity findByCalendarIdWithDoctor(UUID calendarId) {
@@ -57,17 +58,11 @@ public class CalendarService {
         final LocalDate currentDate = SystemClockUtils.getCurrentDate();
         final LocalTime currentTime = SystemClockUtils.getCurrentTime();
         List<CalendarEntity> calendars = calendarRepository.findAllByDoctorId(doctorId);
-        return calendars.stream().filter(calendar -> calendar.getCalendarStatus().equals(CalendarStatus.AVAILABLE))
-                .filter(calendar -> {
-                    LocalDate calendarDate = calendar.getDate();
-                    LocalTime startTime = calendar.getStartTime();
-                    if (calendarDate.isEqual(currentDate)) {
-                        return startTime.isAfter(currentTime);
-                    }
-
-                    return calendarDate.isAfter(currentDate);
-                })
-                .map(CalendarMapperDTO::toResponseDTO).toList();
+        verifyDoctorHasCalendar(calendars);
+        return calendars.stream()
+                .filter(calendar -> isCalendarAvailableAfterNow(calendar, currentDate, currentTime))
+                .map(CalendarMapperDTO::toResponseDTO)
+                .toList();
     }
 
     public List<CalendarConsultationResponseDTO> getCalendarConsultation(CalendarConsultationRequestDTO requestDTO) {
@@ -80,10 +75,10 @@ public class CalendarService {
                 CalendarConsultationResponseDTO item = getCalendarBySpecificalDayAndHour(requestDTO);
                 yield List.of(item);
             }
-            case INTERVAL -> getCalendarBySpecificalInterval(doctorId, startDate, requestDTO.getFinalDate());
-            case DAILY -> getCalendarBySpecificalInterval(doctorId, startDate, startDate);
+            case INTERVAL -> getCalendarByInterval(doctorId, startDate, requestDTO.getFinalDate());
+            case DAILY -> getCalendarByInterval(doctorId, startDate, startDate);
             case WEEKLY ->
-                getCalendarBySpecificalInterval(doctorId, startDate, startDate.plusDays(7)).stream().filter(c -> {
+                getCalendarByInterval(doctorId, startDate, startDate.plusDays(7)).stream().filter(c -> {
                     if (c.getDate().equals(startDate)) {
                         return !c.getStartTime().isBefore(SystemClockUtils.getCurrentTime());
                     }
@@ -94,26 +89,19 @@ public class CalendarService {
     }
 
     public CalendarResponseDTO updateCalendarStatus(UUID calendarId, CalendarStatus status) {
-        CalendarEntity calendar = calendarRepository.findById(calendarId)
-                .orElseThrow(() -> new CalendarNotFoundException("Horário não encontrado"));
-
-        return updateCalendarStatusAndReturn(calendar, status);
+        CalendarEntity calendar = getCalendarByIdAndCheckDoctorPermission(calendarId);
+        checkActionTypeAndCalendarStatus(calendar);
+        CalendarEntity updated = updateCalendarStatus(calendar, status);
+        return CalendarMapperDTO.toResponseDTO(updated);
     }
 
-    public CalendarResponseDTO updateCalendarStatusAndReturn(CalendarEntity calendar, CalendarStatus status) {
+    public CalendarEntity updateCalendarStatus(CalendarEntity calendar, CalendarStatus status) {
         calendar.setCalendarStatus(status);
-        calendarRepository.save(calendar);
-        return CalendarMapperDTO.toResponseDTO(calendar);
-    }
-
-    public void updateCalendarStatus(CalendarEntity calendar, CalendarStatus status) {
-        calendar.setCalendarStatus(status);
-        calendarRepository.save(calendar);
+        return calendarRepository.save(calendar);
     }
 
     public void deleteCalendarById(UUID calendarId) {
-        CalendarEntity calendar = calendarRepository.findById(calendarId)
-                .orElseThrow(() -> new CalendarNotFoundException("Calendário não encontrado"));
+        CalendarEntity calendar = getCalendarByIdAndCheckDoctorPermission(calendarId);
         calendarRepository.delete(calendar);
     }
 
@@ -123,16 +111,34 @@ public class CalendarService {
         }
     }
 
+    private static void checkActionTypeAndCalendarStatus(CalendarEntity calendar) {
+        if (calendar.getCalendarStatus().equals(CalendarStatus.UNAVAILABLE)) {
+            throw new CalendarStatusException();
+
+        }
+    }
+
     public static void checkCalendarStatusAndHour(CalendarStatus status, boolean isDateAndHourWithInPeriod) {
         if (status != CalendarStatus.AVAILABLE || !isDateAndHourWithInPeriod) {
             throw new UnavaliableTimeException("O horário se encontra indisponível");
         }
     }
 
+    public void checkCalendarPermissions(UUID doctorId, LocalDate startDate) {
+        calendarPermissionService.validatePermissionCalendar(doctorId, Optional.ofNullable(startDate));
+    }
+
+    private CalendarEntity getCalendarByIdAndCheckDoctorPermission(UUID calendarId) {
+        CalendarEntity calendar = calendarRepository.findByIdWithDoctor(calendarId)
+                .orElseThrow(() -> new CalendarNotFoundException("Calendário não encontrado"));
+        checkCalendarPermissions(calendar.getDoctor().getId(), calendar.getDate());
+        return calendar;
+    }
+
     private LocalDate getStartDate(IntervalChoice choice, LocalDate startDate) {
-        List<IntervalChoice> automaticSystemDateChoices = new ArrayList<>(
-                List.of(IntervalChoice.DAILY, IntervalChoice.WEEKLY));
-        return automaticSystemDateChoices.contains(choice) ? SystemClockUtils.getCurrentDate() : startDate;
+        return AUTOMATIC_SYSTEM_DATE_CHOICES.contains(choice)
+                ? SystemClockUtils.getCurrentDate()
+                : startDate;
     }
 
     private CalendarConsultationResponseDTO getCalendarBySpecificalDayAndHour(
@@ -144,7 +150,7 @@ public class CalendarService {
         return CalendarMapperDTO.toCalendarConsultationResponse(calendar);
     }
 
-    private List<CalendarConsultationResponseDTO> getCalendarBySpecificalInterval(
+    private List<CalendarConsultationResponseDTO> getCalendarByInterval(
             UUID doctorId, LocalDate startDate, LocalDate finalDate) {
         checkEndDate(startDate, finalDate);
 
@@ -164,8 +170,10 @@ public class CalendarService {
         }
     }
 
-    public void checkCalendarPermissions(UUID doctorId, LocalDate startDate) {
-        calendarPermissionService.validatePermissionCalendar(doctorId, Optional.ofNullable(startDate));
+    private boolean isCalendarAvailableAfterNow(CalendarEntity calendar, LocalDate today, LocalTime now) {
+        return calendar.getCalendarStatus().equals(CalendarStatus.AVAILABLE) &&
+                (calendar.getDate().isAfter(today) ||
+                        (calendar.getDate().isEqual(today) && calendar.getStartTime().isAfter(now)));
     }
 
 }
